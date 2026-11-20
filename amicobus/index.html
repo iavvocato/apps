@@ -817,7 +817,12 @@ const VIEWS = {
 
       '<details class="card"><summary>Compilazione automatica del sito</summary>' +
       '<p>Per riempire il modulo di CTM da solo serve un piccolo script nel browser del telefono. Si installa una volta.</p>' +
-      '<h3>iPhone e iPad (Safari)</h3><ol class="list-plain"><li>Installa l\'app gratuita <strong>Userscripts</strong> dall\'App Store.</li><li>In Impostazioni → Safari → Estensioni attiva Userscripts e consenti l\'accesso a ctmcagliari.it.</li><li>Tocca “Copia lo script”, apri Userscripts, crea un nuovo script e incollalo.</li></ol>' +
+      '<h3>iPhone e iPad (Safari)</h3><ol class="list-plain">' +
+      '<li>Installa l\'app gratuita <strong>Userscripts</strong> dall\'App Store e aprila una volta. Non serve cambiare la cartella.</li>' +
+      '<li>In <strong>Impostazioni → Safari → Estensioni → Userscripts</strong> attiva “Consenti estensione”.</li>' +
+      '<li>In Safari apri <strong>Apri lo script</strong> (pulsante qui sotto). Tocca l\'icona delle estensioni nella barra degli indirizzi (il pezzo di puzzle, o “aA”) → <strong>Userscripts</strong>, consenti se te lo chiede, poi tocca <strong>Install</strong>.</li>' +
+      '<li>In Safari apri la <a href="' + CTM_URL + '" target="_blank" rel="noopener">pagina di prenotazione CTM</a>, tocca di nuovo l\'icona delle estensioni → <strong>Userscripts</strong> → <strong>Consenti sempre su questo sito web</strong>.</li>' +
+      '</ol><p class="small">Se al punto 3 non compare “Install”: nel riquadro di Userscripts tocca <strong>+</strong> → <strong>New JS</strong>, cancella il testo di esempio, incolla lo script (pulsante “Copia lo script”) e tocca <strong>Save</strong>. Le voci possono cambiare un po\' tra le versioni di iOS.</p>' +
       '<h3>Android</h3><ol class="list-plain"><li>Installa <strong>Firefox</strong> e il componente aggiuntivo <strong>Violentmonkey</strong>.</li><li>Apri il link dello script qui sotto con Firefox e tocca Installa, oppure copialo e incollalo in un nuovo script.</li><li>Apri questa app con Firefox.</li></ol>' +
       '<div class="row"><button data-a="copia-script">Copia lo script</button><a class="btn" href="amicobus.user.js" target="_blank" rel="noopener">Apri lo script</a></div>' +
       '<p class="small">Lo script non invia nulla da solo: scrive i dati nel modulo. La casella del robot e il tasto Prenota restano alla persona.</p></details>' +
