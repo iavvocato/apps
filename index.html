@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>App di iAvvocato</title>
+<meta name="description" content="Piccole app gratuite e a codice aperto di iAvvocato.">
+<link rel="icon" type="image/png" href="amicobus/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@500;700&display=swap">
+<style>
+:root {
+  --bg: #EEF3F6; --surface: #FFFFFF; --ink: #12222D; --muted: #4A5E6C; --line: #C9D6DE; --accent: #0B5AA8;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-head: "Lexend", "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0E1920; --surface: #16252F; --ink: #E7EFF4; --muted: #A3B6C3; --line: #2C4250; --accent: #6AAEF2; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 18px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: calc(32px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px));
+}
+main { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+h1, h2 { font-family: var(--font-head); margin: 0; line-height: 1.2; text-wrap: balance; }
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.2rem; }
+p { margin: 0; }
+.muted { color: var(--muted); font-size: 0.92rem; }
+a { color: var(--accent); }
+.app { display: grid; grid-template-columns: 72px 1fr; gap: 16px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; text-decoration: none; color: inherit; }
+.app:hover { border-color: var(--accent); }
+.app:focus-visible { outline: 4px solid #F2B705; outline-offset: 2px; }
+.app img { width: 72px; height: 72px; border-radius: 16px; }
+.app div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.app .go { color: var(--accent); font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>App di iAvvocato</h1>
+    <p class="muted">Piccoli strumenti gratuiti per risolvere problemi pratici. Si aprono dal browser e si possono salvare sulla schermata Home del telefono.</p>
+  </header>
+
+  <a class="app" href="amicobus/">
+    <img src="amicobus/icon-192.png" alt="">
+    <div>
+      <h2>Il mio Amicobus</h2>
+      <p>Per prenotare il bus Amicobus di CTM Cagliari, il servizio a chiamata per persone con disabilità: viaggi già pronti, orari di prenotazione, telefonata guidata, annullamento su WhatsApp.</p>
+      <p class="muted">Non è un servizio ufficiale CTM.</p>
+      <span class="go">Apri l'app →</span>
+    </div>
+  </a>
+
+  <footer class="muted">
+    <p>Le app non usano account, cookie o statistiche: i dati restano sul telefono di chi le usa.</p>
+    <p><a href="https://iavvocato.cloud">iavvocato.cloud</a> · <a href="https://github.com/iavvocato/apps">codice su GitHub</a> (licenza MIT)</p>
+  </footer>
+</main>
+</body>
+</html>
