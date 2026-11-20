@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Il mio Amicobus</title>
+<meta name="description" content="Prenotare Amicobus di CTM Cagliari in modo semplice: viaggi già pronti, orari di prenotazione, telefonata guidata e annullamento via WhatsApp. Non è un servizio ufficiale CTM.">
+<meta name="theme-color" content="#0B5AA8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Amicobus">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@500;700&display=swap">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+</head>
+<body>
+<style>
+/* Layout: una sola colonna stretta come un telefono, pulsanti grandi, una cosa alla volta. */
+:root {
+  --bg: #EEF3F6;
+  --surface: #FFFFFF;
+  --ink: #12222D;
+  --muted: #4A5E6C;
+  --line: #C9D6DE;
+  --accent: #0B5AA8;
+  --accent-ink: #FFFFFF;
+  --bus: #F2B705;
+  --bus-ink: #12222D;
+  --ok: #1B7A4B;
+  --ok-bg: #DDF3E7;
+  --warn: #8A5300;
+  --warn-bg: #FDEFD3;
+  --stop: #A8241C;
+  --stop-bg: #FBE1DE;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-head: "Lexend", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --r: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1920; --surface: #16252F; --ink: #E7EFF4; --muted: #A3B6C3; --line: #2C4250;
+    --accent: #6AAEF2; --accent-ink: #0E1920; --bus: #F5C842; --bus-ink: #12222D;
+    --ok: #5FD09A; --ok-bg: #143327; --warn: #F2B25C; --warn-bg: #3A2A10; --stop: #F38A80; --stop-bg: #3D1A17;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1920; --surface: #16252F; --ink: #E7EFF4; --muted: #A3B6C3; --line: #2C4250;
+  --accent: #6AAEF2; --accent-ink: #0E1920; --bus: #F5C842; --bus-ink: #12222D;
+  --ok: #5FD09A; --ok-bg: #143327; --warn: #F2B25C; --warn-bg: #3A2A10; --stop: #F38A80; --stop-bg: #3D1A17;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 19px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 48px;
+}
+#app { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1, h2, h3 { font-family: var(--font-head); text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.55rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.08rem; }
+p { margin: 0; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { width: 44px; height: 44px; border-radius: 12px; background: var(--bus); display: grid; place-items: center; font-size: 26px; flex: none; }
+.small { font-size: 0.86rem; color: var(--muted); }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > * { flex: 1 1 140px; min-width: 0; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.signal { border-width: 3px; }
+.signal.ok { border-color: var(--ok); background: var(--ok-bg); }
+.signal.stop { border-color: var(--stop); background: var(--stop-bg); }
+.signal.warn { border-color: var(--warn); background: var(--warn-bg); }
+.signal-head { display: flex; align-items: center; gap: 14px; }
+.lamp { width: 40px; height: 40px; border-radius: 50%; flex: none; box-shadow: inset 0 -4px 0 rgba(0,0,0,.18); }
+.ok .lamp { background: var(--ok); }
+.stop .lamp { background: var(--stop); }
+.warn .lamp { background: var(--warn); }
+
+button, .btn {
+  font: inherit; font-weight: 700; color: var(--ink); background: var(--surface);
+  border: 2px solid var(--line); border-radius: 16px; min-height: 60px; padding: 12px 18px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px; text-align: center;
+  cursor: pointer; text-decoration: none; width: 100%;
+}
+button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 4px solid var(--bus); outline-offset: 2px; }
+.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-size: 1.12rem; min-height: 72px; }
+.yellow { background: var(--bus); color: var(--bus-ink); border-color: var(--bus); }
+.danger { color: var(--stop); border-color: var(--stop); }
+.quiet { min-height: 48px; width: auto; font-size: 0.92rem; padding: 8px 14px; }
+.back { min-height: 48px; width: auto; align-self: flex-start; font-size: 0.95rem; }
+.emoji { font-size: 1.7em; line-height: 1; }
+
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.tile { flex-direction: column; min-height: 140px; font-size: 1.02rem; }
+.tile .emoji { font-size: 2.6rem; }
+.tile .small { font-weight: 400; }
+@media (max-width: 360px) { .tiles { grid-template-columns: 1fr; } }
+
+.route { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; }
+.route .emoji { font-size: 2rem; }
+.route .arrow { grid-column: 1; text-align: center; color: var(--muted); font-size: 1.3rem; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; font-weight: 700; min-width: 0; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 12px; font-size: 0.86rem; font-weight: 700; align-self: flex-start; }
+.pill.inviata { background: var(--warn-bg); color: var(--warn); }
+.pill.confermata { background: var(--ok-bg); color: var(--ok); }
+.pill.annullata, .pill.rifiutata { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.steps { display: flex; gap: 6px; }
+.steps span { flex: 1; height: 8px; border-radius: 4px; background: var(--line); }
+.steps span.on { background: var(--ok); }
+
+.big-number { font-family: var(--font-head); font-size: 2rem; font-weight: 700; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; user-select: all; }
+.script { display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.script li { background: var(--bg); border-radius: 12px; padding: 12px 14px; }
+.notice { border-radius: 14px; padding: 12px 14px; background: var(--warn-bg); color: var(--ink); border: 1px solid var(--warn); font-size: 0.95rem; }
+.notice.info { background: var(--bg); border-color: var(--line); }
+.msg { white-space: pre-wrap; background: var(--bg); border-radius: 12px; padding: 12px 14px; font-size: 0.98rem; user-select: all; }
+
+label { font-weight: 700; display: flex; flex-direction: column; gap: 6px; font-size: 0.95rem; min-width: 0; }
+input, select, textarea { font: inherit; font-weight: 400; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 52px; width: 100%; min-width: 0; }
+textarea { min-height: 96px; font-size: 0.8rem; font-family: ui-monospace, monospace; }
+.check { flex-direction: row; align-items: center; gap: 12px; font-weight: 400; }
+.check input { width: 28px; min-height: 28px; height: 28px; flex: none; }
+.edit-item { border: 1px dashed var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+details.card summary { cursor: pointer; font-family: var(--font-head); font-weight: 700; font-size: 1.1rem; list-style-position: outside; }
+details.card[open] summary { margin-bottom: 4px; }
+pre.code { overflow-x: auto; background: var(--bg); border-radius: 12px; padding: 12px; font-size: 0.75rem; max-height: 220px; }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.keypad button { min-height: 68px; font-size: 1.5rem; }
+.pin-dots { display: flex; gap: 14px; justify-content: center; }
+.pin-dots span { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--ink); }
+.pin-dots span.on { background: var(--ink); }
+.list-plain { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+a { color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .card { animation: up .18s ease-out; } @keyframes up { from { transform: translateY(6px); } to { transform: none; } } }
+</style>
+
+<main id="app" aria-live="polite"></main>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- Dati fissi del servizio (fonte: ctmcagliari.it, pagina Amicobus) ---------- */
+const COMUNI = ['Cagliari', "Quartu Sant'Elena", 'Monserrato', 'Selargius', 'Quartucciu', 'Elmas', 'Assemini', 'Decimomannu'];
+const NUMERO_VERDE = '800 259 745';
+const TEL = '800259745';
+const WA_NUM = '393482502731';
+const WA_SHOW = '348 250 2731';
+const CTM_URL = 'https://www.ctmcagliari.it/prenotazione-servizio/';
+const SUS_URL = 'https://sus.regione.sardegna.it/sus';
+const TARIFFA = 1.30;
+const ASSOCIAZIONI = [
+  { nome: 'A.N.M.I.C. Cagliari', indirizzo: 'Via Caprera 27, Cagliari', tel: '070 653865', email: 'anmic.cagliari@gmail.com' },
+  { nome: 'Rp Sardegna OdV', indirizzo: 'Via Tola 30, Cagliari', tel: '070 6407661', email: 'rpsardegnaonlus@gmail.com' },
+  { nome: 'UICI Onlus-APS Cagliari', indirizzo: 'Via Del Platano 27, Cagliari', tel: '070 523422', email: 'uicca@uiciechi.it' }
+];
+const EMOJI = ['🏠','🏫','🏥','🏢','🛒','⛪','🏊','⚽','🎨','🍽️','👵','👴','👨‍👩‍👧','💊','🌳','🎵','📚','🏖️','☕','🚉'];
+const GIORNI = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+/* Orari del call center, in minuti dalla mezzanotte. Valgono anche per il modulo web. */
+const FINESTRE = { 1: [[480, 780]], 2: [[480, 780]], 3: [[480, 780]], 4: [[480, 780]], 5: [[480, 780], [900, 1140]] };
+const STORE = 'mioAmicobus.v1';
+
+/* ---------- Utilità ---------- */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => (n < 10 ? '0' : '') + n;
+const dayStart = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+const addDays = (d, k) => { const x = new Date(d); x.setDate(x.getDate() + k); return x; };
+const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const fromIso = s => { const p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); };
+const hm = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+const toMin = s => { const p = (s || '0:0').split(':'); return (+p[0]) * 60 + (+p[1]); };
+const minOf = d => d.getHours() * 60 + d.getMinutes();
+const euro = v => v.toFixed(2).replace('.', ',') + ' €';
+const uid = () => Math.random().toString(36).slice(2, 9);
+function dataLunga(d) { return GIORNI[d.getDay()] + ' ' + d.getDate() + ' ' + MESI[d.getMonth()]; }
+function dataUmana(d, now) {
+  const oggi = dayStart(now || new Date());
+  if (sameDay(d, oggi)) return 'oggi, ' + dataLunga(d);
+  if (sameDay(d, addDays(oggi, 1))) return 'domani, ' + dataLunga(d);
+  if (sameDay(d, addDays(oggi, 2))) return 'dopodomani, ' + dataLunga(d);
+  return dataLunga(d);
+}
+function elencoGiorni(arr) {
+  const n = arr.map(d => GIORNI[d.getDay()]);
+  return n.length < 2 ? (n[0] || '') : n.slice(0, -1).join(', ') + ' e ' + n[n.length - 1];
+}
+
+/* ---------- Regole di prenotazione ---------- */
+function giornoPrenotazione(viaggio) {
+  const dow = viaggio.getDay();
+  if (dow >= 2 && dow <= 5) return { giorno: addDays(viaggio, -1), finestre: [[480, 780]] };
+  if (dow === 6) return { giorno: addDays(viaggio, -1), finestre: [[480, 780]] };
+  if (dow === 0) return { giorno: addDays(viaggio, -2), finestre: [[480, 780]] };
+  return { giorno: addDays(viaggio, -3), finestre: [[480, 780], [900, 1140]] };
+}
+function prenotabiliOra(now) {
+  const out = [];
+  for (let k = 1; k <= 3; k++) {
+    const d = addDays(dayStart(now), k);
+    if (S.prova) { out.push({ data: d, chiude: null }); continue; }
+    const r = giornoPrenotazione(d);
+    if (!sameDay(r.giorno, now)) continue;
+    const m = minOf(now);
+    const f = r.finestre.find(w => m >= w[0] && m < w[1]);
+    if (f) out.push({ data: d, chiude: f[1] });
+  }
+  return out;
+}
+function prossimaFinestra(now) {
+  for (let k = 0; k < 9; k++) {
+    const g = addDays(dayStart(now), k);
+    for (const f of (FINESTRE[g.getDay()] || [])) {
+      const inizio = new Date(g); inizio.setMinutes(f[0]);
+      if (inizio <= now) continue;
+      const per = [];
+      for (let j = 1; j <= 3; j++) {
+        const d = addDays(g, j);
+        const r = giornoPrenotazione(d);
+        if (sameDay(r.giorno, g) && r.finestre.some(x => x[0] === f[0])) per.push(d);
+      }
+      return { inizio, fine: f[1], per };
+    }
+  }
+  return null;
+}
+function callCenterAperto(now) {
+  const m = minOf(now);
+  return (FINESTRE[now.getDay()] || []).find(w => m >= w[0] && m < w[1]) || null;
+}
+
+/* ---------- Dati salvati sul telefono ---------- */
+function esempio() {
+  return {
+    v: 1, esempio: true, pin: '1234', prova: false,
+    profilo: { nome: 'Maria', cognome: 'Esempio', telefono: '333 000 0000', email: 'maria.esempio@example.com', accompagnatore: 'accompagnatore', posto: 'normale' },
+    accredito: { scadenza: iso(addDays(new Date(), 25)) },
+    luoghi: [
+      { id: 'casa', nome: 'Casa', emoji: '🏠', indirizzo: 'Via Esempio 1', citta: 'Cagliari' },
+      { id: 'centro', nome: 'Centro diurno', emoji: '🏫', indirizzo: 'Via del Centro 10', citta: "Quartu Sant'Elena" },
+      { id: 'nonna', nome: 'Nonna Anna', emoji: '👵', indirizzo: 'Via dei Nonni 5', citta: 'Selargius' },
+      { id: 'stadio', nome: 'Stadio (Distinti)', emoji: '⚽', indirizzo: 'Unipol Domus, ingresso dedicato settore Distinti', citta: 'Cagliari' }
+    ],
+    viaggi: [
+      { id: 'v1', tipo: 'normale', emoji: '🏫', nome: 'Al Centro diurno', da: 'casa', a: 'centro', oraAndata: '08:30', ritorno: true, oraRitorno: '13:00' },
+      { id: 'v2', tipo: 'normale', emoji: '👵', nome: 'Dalla nonna', da: 'casa', a: 'nonna', oraAndata: '16:00', ritorno: true, oraRitorno: '19:00' },
+      { id: 'v3', tipo: 'partita', emoji: '⚽', nome: 'Partita del Cagliari', da: 'casa', a: 'stadio', oraAndata: '', ritorno: true, oraRitorno: '' }
+    ],
+    prenotazioni: []
+  };
+}
+let storageOk = true;
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) { const s = JSON.parse(raw); if (s && s.v === 1) return s; }
+  } catch (e) { storageOk = false; }
+  return esempio();
+}
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(S)); storageOk = true; } catch (e) { storageOk = false; }
+}
+let S = load();
+(function pulisci() {
+  const limite = addDays(dayStart(new Date()), -30);
+  S.prenotazioni = (S.prenotazioni || []).filter(p => fromIso(p.data) >= limite);
+})();
+
+const luogo = id => S.luoghi.find(l => l.id === id);
+const viaggio = id => S.viaggi.find(v => v.id === id);
+const pren = id => S.prenotazioni.find(p => p.id === id);
+const nomeCompleto = () => (S.profilo.nome + ' ' + S.profilo.cognome).trim();
+
+/* ---------- Stato della schermata ---------- */
+let V = { view: 'home' };
+let pinBuffer = '';
+function go(view, extra) { V = Object.assign({ view }, extra || {}); render(); window.scrollTo(0, 0); }
+
+/* ---------- Composizione della richiesta ---------- */
+function dettagli(p) {
+  const v = { emoji: p.emoji, nome: p.nome, tipo: p.tipo, da: p.da, a: p.a, ritorno: p.ritorno, oraAndata: p.oraAndata, oraRitorno: p.oraRitorno, oraPartita: p.oraPartita };
+  const da = luogo(v.da) || {}, a = luogo(v.a) || {};
+  let oraA = v.oraAndata, oraR = v.oraRitorno, testoA, testoR;
+  if (v.tipo === 'partita') {
+    const k = toMin(v.oraPartita || '15:00');
+    testoA = 'Partita del Cagliari alle ' + (v.oraPartita || '15:00') + ': arrivo all\'ingresso Distinti entro le ' + hm(k - 60);
+    testoR = 'Ritorno dopo la partita (le corse partono da 45 minuti dopo la fine)';
+    oraA = 'Partita ore ' + (v.oraPartita || '15:00');
+    oraR = 'Fine partita';
+  }
+  return { v, da, a, oraA, oraR, testoA, testoR, tratte: v.ritorno ? 2 : 1 };
+}
+function richiestaDa(viaggioObj, dataIso, oraPartita) {
+  return {
+    id: uid(), viaggioId: viaggioObj.id, data: dataIso, stato: 'bozza', canale: null, creata: new Date().toISOString(),
+    emoji: viaggioObj.emoji, nome: viaggioObj.nome, tipo: viaggioObj.tipo, da: viaggioObj.da, a: viaggioObj.a,
+    ritorno: viaggioObj.ritorno, oraAndata: viaggioObj.oraAndata, oraRitorno: viaggioObj.oraRitorno,
+    oraPartita: oraPartita || null, passaggioAndata: '', passaggioRitorno: ''
+  };
+}
+function b64url(obj) {
+  const bytes = new TextEncoder().encode(JSON.stringify(obj));
+  let bin = ''; bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function fromB64url(s) {
+  let b = s.trim().replace(/-/g, '+').replace(/_/g, '/');
+  while (b.length % 4) b += '=';
+  const bin = atob(b); const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+function linkCTM(p) {
+  const d = dettagli(p), pr = S.profilo;
+  const payload = {
+    n: pr.nome, c: pr.cognome, t: pr.telefono, e: pr.email, d: p.data,
+    acc: pr.accompagnatore === 'nessuno' ? '' : pr.accompagnatore,
+    tipo: d.v.ritorno ? 'andataritorno' : 'andata',
+    a: { p: d.da.indirizzo, pc: d.da.citta, a: d.a.indirizzo, ac: d.a.citta, o: d.oraA },
+    s: dataLunga(fromIso(p.data)) + ': ' + (d.da.nome || '') + ' → ' + (d.a.nome || '') + (d.v.tipo === 'partita' ? '' : ' alle ' + d.oraA)
+  };
+  if (d.v.ritorno) payload.r = { p: d.a.indirizzo, pc: d.a.citta, a: d.da.indirizzo, ac: d.da.citta, o: d.oraR };
+  return CTM_URL + '#amicobus=' + b64url(payload);
+}
+function copione(p) {
+  const d = dettagli(p), pr = S.profilo;
+  const righe = [
+    'Buongiorno, sono ' + nomeCompleto() + '.',
+    'Vorrei prenotare Amicobus per ' + dataLunga(fromIso(p.data)) + '.'
+  ];
+  if (d.v.tipo === 'partita') {
+    righe.push('È per la partita del Cagliari, che inizia alle ' + (p.oraPartita || '15:00') + '.');
+    righe.push('Andata: parto da ' + d.da.indirizzo + ', ' + d.da.citta + ', e vado allo stadio, ingresso Distinti.');
+    if (d.v.ritorno) righe.push('Ritorno: dopo la partita torno a ' + d.da.indirizzo + ', ' + d.da.citta + '.');
+  } else {
+    righe.push('Andata: parto da ' + d.da.indirizzo + ', ' + d.da.citta + ', alle ' + d.oraA + '. Vado a ' + d.a.indirizzo + ', ' + d.a.citta + '.');
+    if (d.v.ritorno) righe.push('Ritorno: parto da ' + d.a.indirizzo + ', ' + d.a.citta + ', alle ' + d.oraR + '. Torno a ' + d.da.indirizzo + ', ' + d.da.citta + '.');
+    else righe.push('Mi serve solo l\'andata.');
+  }
+  righe.push(pr.accompagnatore === 'accompagnatore' ? 'Viaggio con un accompagnatore.' : pr.accompagnatore === 'minore' ? 'Sono minorenne e viaggio con un accompagnatore.' : 'Viaggio da solo.');
+  righe.push(pr.posto === 'carrozzina' ? 'Mi serve il posto per la sedia a rotelle.' : 'Mi basta un posto a sedere normale.');
+  righe.push('Il mio numero di telefono è ' + pr.telefono + '.');
+  return righe;
+}
+function messaggioCancellazione(p) {
+  const d = dettagli(p);
+  let t = 'Buongiorno, sono ' + nomeCompleto() + ', telefono ' + S.profilo.telefono + '.\n';
+  t += 'Annullo la corsa Amicobus confermata di ' + dataLunga(fromIso(p.data)) + ':\n';
+  t += '- andata da ' + d.da.indirizzo + ', ' + d.da.citta + ' a ' + d.a.indirizzo + ', ' + d.a.citta + (p.passaggioAndata ? ' (passaggio alle ' + p.passaggioAndata + ')' : '') + '\n';
+  if (d.v.ritorno) t += '- ritorno da ' + d.a.indirizzo + ', ' + d.a.citta + ' a ' + d.da.indirizzo + ', ' + d.da.citta + (p.passaggioRitorno ? ' (passaggio alle ' + p.passaggioRitorno + ')' : '') + '\n';
+  t += 'Grazie.';
+  return t;
+}
+function datiMancanti(v) {
+  const m = [];
+  if (!S.profilo.nome || !S.profilo.cognome) m.push('nome e cognome');
+  if (!S.profilo.telefono) m.push('numero di telefono');
+  const da = luogo(v.da), a = luogo(v.a);
+  if (!da || !da.indirizzo) m.push('indirizzo di partenza');
+  if (!a || !a.indirizzo) m.push('indirizzo di arrivo');
+  if (v.tipo !== 'partita' && !v.oraAndata) m.push('orario di andata');
+  if (v.tipo !== 'partita' && v.ritorno && !v.oraRitorno) m.push('orario di ritorno');
+  return m;
+}
+
+/* ---------- Voce ---------- */
+function parla(testo) {
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(testo);
+    u.lang = 'it-IT'; u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  } catch (e) { /* voce non disponibile */ }
+}
+async function copia(testo, btn) {
+  try { await navigator.clipboard.writeText(testo); if (btn) { const t = btn.textContent; btn.textContent = 'Copiato ✓'; setTimeout(() => { btn.textContent = t; }, 1800); } }
+  catch (e) { if (btn) btn.textContent = 'Seleziona il testo e copialo'; }
+}
+
+/* ---------- Pezzi di interfaccia ---------- */
+function header(titolo, conIndietro) {
+  return '<div class="top"><div class="brand"><div class="brand-mark" aria-hidden="true">🚌</div><div><h1>' + esc(titolo || 'Il mio Amicobus') + '</h1>' +
+    (V.view === 'home' ? '<p class="small">Prenoto il bus Amicobus di CTM</p>' : '') + '</div></div>' +
+    (V.view === 'home' ? '<button class="quiet" data-a="pin">⚙️ Impostazioni</button>' : '') + '</div>' +
+    (conIndietro ? '<button class="back" data-a="home">← Torna all\'inizio</button>' : '');
+}
+function routeBlock(d) {
+  return '<div class="route"><span class="emoji" aria-hidden="true">' + esc(d.da.emoji || '📍') + '</span><div><strong>' + esc(d.da.nome || '?') + '</strong><div class="small">' + esc((d.da.indirizzo || '') + ', ' + (d.da.citta || '')) + '</div></div>' +
+    '<span class="arrow" aria-hidden="true">↓</span><span></span>' +
+    '<span class="emoji" aria-hidden="true">' + esc(d.a.emoji || '📍') + '</span><div><strong>' + esc(d.a.nome || '?') + '</strong><div class="small">' + esc((d.a.indirizzo || '') + ', ' + (d.a.citta || '')) + '</div></div></div>';
+}
+function semaforo(now) {
+  const ora = prenotabiliOra(now);
+  if (ora.length) {
+    return '<section class="card signal ok"><div class="signal-head"><span class="lamp" aria-hidden="true"></span><h2>Adesso puoi prenotare</h2></div>' +
+      '<p>Puoi prenotare per <strong>' + ora.map(o => esc(dataUmana(o.data, now))).join('</strong>, per <strong>') + '</strong>.</p>' +
+      (ora[0].chiude ? '<p>Hai tempo fino alle <strong>' + hm(ora[0].chiude) + '</strong> di oggi.</p>' : '<p class="small">Modalità prova: gli orari di prenotazione sono ignorati.</p>') + '</section>';
+  }
+  const pf = prossimaFinestra(now);
+  if (!pf) return '';
+  const quando = sameDay(pf.inizio, now) ? 'oggi' : sameDay(pf.inizio, addDays(dayStart(now), 1)) ? 'domani, ' + dataLunga(pf.inizio) : dataLunga(pf.inizio);
+  return '<section class="card signal stop"><div class="signal-head"><span class="lamp" aria-hidden="true"></span><h2>Adesso non puoi prenotare</h2></div>' +
+    '<p>La prossima volta: <strong>' + esc(quando) + '</strong>, dalle <strong>' + hm(minOf(pf.inizio)) + '</strong> alle <strong>' + hm(pf.fine) + '</strong>.</p>' +
+    '<p>Allora potrai prenotare per <strong>' + esc(elencoGiorni(pf.per)) + '</strong>.</p></section>';
+}
+function avvisoAccredito(now) {
+  const sc = S.accredito && S.accredito.scadenza ? fromIso(S.accredito.scadenza) : null;
+  if (!sc) return '';
+  const giorni = Math.round((dayStart(sc) - dayStart(now)) / 86400000);
+  if (giorni > 45) return '';
+  const scaduto = giorni < 0;
+  return '<section class="card signal ' + (scaduto ? 'stop' : 'warn') + '"><div class="signal-head"><span class="lamp" aria-hidden="true"></span><h2>' +
+    (scaduto ? 'L\'iscrizione ad Amicobus è scaduta' : 'Rinnova l\'iscrizione ad Amicobus') + '</h2></div>' +
+    '<p>' + (scaduto ? 'È scaduta il ' : 'Scade il ') + '<strong>' + esc(dataLunga(sc)) + '</strong>' + (scaduto ? '.' : ' (tra ' + giorni + ' giorni).') + ' Si rinnova ogni anno sul portale della Regione.</p>' +
+    '<button data-a="accredito">Come si rinnova</button></section>';
+}
+function cardPrenotazione(p, now) {
+  const d = dettagli(p);
+  const data = fromIso(p.data);
+  const etichette = { inviata: 'Aspetto la telefonata', confermata: 'Confermato', annullata: 'Annullato', rifiutata: 'Non confermato' };
+  const passi = { inviata: 1, confermata: 2, annullata: 3, rifiutata: 3 };
+  let corpo = '';
+  if (p.stato === 'inviata') {
+    const g = giornoPrenotazione(data).giorno;
+    corpo = '<p>📞 Dalle <strong>17:30</strong> di ' + esc(sameDay(g, now) ? 'oggi' : dataLunga(g)) + ' ti chiamano per dirti se il viaggio è confermato. Tieni il telefono vicino.</p>' +
+      '<div class="row"><button class="yellow" data-a="conferma" data-id="' + p.id + '">✅ Mi hanno chiamato: è confermato</button>' +
+      '<button data-a="rifiuta" data-id="' + p.id + '">✖ Mi hanno detto di no</button></div>' +
+      '<button class="quiet danger" data-a="annulla" data-id="' + p.id + '">Non vado più</button>';
+  } else if (p.stato === 'confermata') {
+    corpo = '<dl class="facts"><dt>Il bus passa</dt><dd>alle ' + esc(p.passaggioAndata || '?') + ' da ' + esc(d.da.nome) + '</dd>' +
+      (d.v.ritorno ? '<dt>Ritorno</dt><dd>alle ' + esc(p.passaggioRitorno || '?') + ' da ' + esc(d.a.nome) + '</dd>' : '') +
+      '<dt>Costo</dt><dd>' + euro(TARIFFA * d.tratte) + '</dd></dl>' +
+      '<div class="row"><button data-a="conferma" data-id="' + p.id + '">Cambia gli orari</button><button class="danger" data-a="annulla" data-id="' + p.id + '">❌ Non vado più</button></div>';
+  } else {
+    corpo = '<button class="quiet" data-a="togli" data-id="' + p.id + '">Togli dalla lista</button>';
+  }
+  return '<article class="card"><div class="row" style="align-items:center"><h3 style="flex:3 1 200px"><span aria-hidden="true">' + esc(p.emoji) + '</span> ' + esc(p.nome) + '</h3>' +
+    '<span class="pill ' + p.stato + '">' + etichette[p.stato] + '</span></div>' +
+    '<p><strong>' + esc(dataUmana(data, now)) + '</strong> · ' + (p.canale === 'telefono' ? 'prenotato al telefono' : 'prenotato sul sito') + '</p>' +
+    (p.stato === 'inviata' || p.stato === 'confermata' ? '<div class="steps" aria-hidden="true"><span class="on"></span><span class="' + (passi[p.stato] >= 2 ? 'on' : '') + '"></span></div>' : '') +
+    corpo + '</article>';
+}
+
+/* ---------- Schermate ---------- */
+const VIEWS = {
+  home(now) {
+    const attive = S.prenotazioni.filter(p => p.stato !== 'bozza' && fromIso(p.data) >= dayStart(now)).sort((a, b) => a.data.localeCompare(b.data));
+    return header() +
+      (S.esempio ? '<p class="notice">Questi sono <strong>dati di esempio</strong>. Chi ti aiuta può inserire i tuoi dati in ⚙️ Impostazioni.</p>' : '') +
+      (!storageOk ? '<p class="notice">Questo browser non salva i dati. Le prenotazioni si perdono quando chiudi la pagina.</p>' : '') +
+      semaforo(now) +
+      '<button class="primary" data-a="scegli">🚌 Prenota un viaggio</button>' +
+      avvisoAccredito(now) +
+      '<h2>I miei viaggi</h2>' +
+      (attive.length ? attive.map(p => cardPrenotazione(p, now)).join('') : '<p class="card small">Non hai viaggi prenotati. Quando prenoti, il viaggio compare qui.</p>') +
+      '<div class="row"><button data-a="chiama">📞 Chiama Amicobus</button><button data-a="info">ℹ️ Come funziona</button></div>' +
+      piede();
+  },
+
+  scegli(now) {
+    const ora = prenotabiliOra(now);
+    if (!ora.length) {
+      return header('Prenota', true) + semaforo(now) +
+        '<p>Il call center e il sito accettano le prenotazioni solo in questi orari. Torna quando il semaforo è verde.</p>';
+    }
+    if (!S.viaggi.length) return header('Prenota', true) + '<p class="notice">Non ci sono viaggi pronti. Chi ti aiuta può prepararli in ⚙️ Impostazioni.</p>';
+    return header('Dove vuoi andare?', true) +
+      '<div class="tiles">' + S.viaggi.map(v => {
+        const a = luogo(v.a) || {};
+        return '<button class="tile" data-a="viaggio" data-id="' + v.id + '"><span class="emoji" aria-hidden="true">' + esc(v.emoji) + '</span>' + esc(v.nome) +
+          '<span class="small">' + (v.tipo === 'partita' ? 'Allo stadio' : esc(a.nome || '') + ' · ' + esc(v.oraAndata)) + '</span></button>';
+      }).join('') + '</div>';
+  },
+
+  giorno(now) {
+    const v = viaggio(V.viaggioId);
+    const ora = prenotabiliOra(now);
+    return header('Quando?', true) +
+      '<p><span aria-hidden="true">' + esc(v.emoji) + '</span> <strong>' + esc(v.nome) + '</strong></p>' +
+      '<div class="stack">' + ora.map(o => '<button class="primary" data-a="data" data-d="' + iso(o.data) + '">' + esc(dataUmana(o.data, now)) + '</button>').join('') + '</div>';
+  },
+
+  partita() {
+    const opzioni = ['12:30', '15:00', '18:00', '20:45'];
+    return header('A che ora inizia la partita?', true) +
+      '<div class="tiles">' + opzioni.map(o => '<button class="tile" data-a="orapartita" data-o="' + o + '"><span class="emoji" aria-hidden="true">⚽</span>' + o + '</button>').join('') + '</div>' +
+      '<label for="partita-altro">Un altro orario<input type="time" id="partita-altro" value="16:00"></label>' +
+      '<button data-a="orapartita-altro">Usa questo orario</button>' +
+      '<p class="small">Il bus ti porta all\'ingresso dedicato dei Distinti almeno un\'ora prima. Il ritorno parte da 45 minuti dopo la fine. Gli orari esatti te li dicono quando ti chiamano per confermare.</p>';
+  },
+
+  riepilogo(now) {
+    const p = V.bozza, d = dettagli(p);
+    const mancano = datiMancanti(d.v);
+    const carrozzina = S.profilo.posto === 'carrozzina';
+    const aperto = callCenterAperto(now) || S.prova;
+    let h = header('Controlla il viaggio', true) +
+      '<section class="card"><p class="small">Viaggio</p><h2>' + esc(dataUmana(fromIso(p.data), now)) + '</h2>' + routeBlock(d) +
+      '<dl class="facts">' +
+      (d.v.tipo === 'partita' ? '<dt>Andata</dt><dd>' + esc(d.testoA) + '</dd>' + (d.v.ritorno ? '<dt>Ritorno</dt><dd>' + esc(d.testoR) + '</dd>' : '')
+        : '<dt>Andata</dt><dd>alle ' + esc(d.oraA) + '</dd>' + (d.v.ritorno ? '<dt>Ritorno</dt><dd>alle ' + esc(d.oraR) + '</dd>' : '<dt>Ritorno</dt><dd>no, solo andata</dd>')) +
+      '<dt>Con te</dt><dd>' + (S.profilo.accompagnatore === 'nessuno' ? 'nessuno' : 'un accompagnatore') + '</dd>' +
+      '<dt>Costo</dt><dd>' + euro(TARIFFA * d.tratte) + ' <span class="small">(' + euro(TARIFFA) + ' a tratta)</span></dd></dl>' +
+      '<button data-a="ascolta-riepilogo">🔊 Ascolta</button></section>';
+    if (mancano.length) {
+      return h + '<p class="notice">Mancano dei dati: <strong>' + esc(mancano.join(', ')) + '</strong>. Chiedi a chi ti aiuta di inserirli in ⚙️ Impostazioni.</p>';
+    }
+    if (carrozzina) h += '<p class="notice">Sul sito non c\'è la casella per la <strong>sedia a rotelle</strong>. È meglio prenotare al telefono, così lo dici all\'operatore.</p>';
+    const web = '<a class="btn ' + (carrozzina ? '' : 'primary') + '" href="' + esc(linkCTM(p)) + '" target="_blank" rel="noopener" data-a="apriweb">🌐 Prenota sul sito CTM</a>';
+    const tel = '<button class="' + (carrozzina ? 'primary' : '') + '" data-a="telefono">📞 Prenota al telefono' + (aperto ? '' : ' (adesso è chiuso)') + '</button>';
+    return h + (carrozzina ? tel + web : web + tel);
+  },
+
+  web() {
+    return header('Sul sito CTM', false) +
+      '<section class="card"><h2>Si è aperto il sito di CTM</h2><ol class="list-plain">' +
+      '<li>I tuoi dati sono già scritti.</li><li>Tocca la casella <strong>☐ Non sono un robot</strong>.</li><li>Poi tocca il tasto blu <strong>PRENOTA</strong>.</li></ol></section>' +
+      '<h2>Hai toccato PRENOTA?</h2>' +
+      '<button class="primary" data-a="web-fatto">✅ Sì, ho prenotato</button>' +
+      '<button data-a="web-problema">Non ha funzionato</button>' +
+      (V.problema ? '<section class="card"><h3>Cosa può essere successo</h3><ul class="list-plain">' +
+        '<li>Se il modulo era vuoto, sul telefono manca lo script di compilazione. Chi ti aiuta lo installa da ⚙️ Impostazioni.</li>' +
+        '<li>Se la casella del robot chiede di scegliere delle immagini e non ci riesci, prenota al telefono.</li></ul>' +
+        '<button data-a="telefono">📞 Prenota al telefono</button><button class="quiet" data-a="riepilogo">Riprova sul sito</button></section>' : '');
+  },
+
+  telefono(now) {
+    const p = V.bozza;
+    const aperto = callCenterAperto(now);
+    const pf = prossimaFinestra(now);
+    const righe = p ? copione(p) : [];
+    return header('Prenota al telefono', true) + numeroBlock(aperto, pf, now) +
+      (p ? '<section class="card"><h2>Cosa dire</h2><ol class="script">' + righe.map(r => '<li>' + esc(r) + '</li>').join('') + '</ol>' +
+        '<button data-a="ascolta-copione">🔊 Ascolta</button></section>' +
+        '<button class="primary" data-a="tel-fatto">✅ Ho prenotato al telefono</button>' : '');
+  },
+
+  chiama(now) {
+    return header('Chiama Amicobus', true) + numeroBlock(callCenterAperto(now), prossimaFinestra(now), now) +
+      '<section class="card"><h3>Per annullare un viaggio confermato</h3><p>Scrivi su WhatsApp al <span class="big-number" style="font-size:1.3rem">' + WA_SHOW + '</span>, almeno 30 minuti prima. Dai tuoi viaggi tocca “Non vado più”: il messaggio è già pronto.</p></section>';
+  },
+
+  conferma() {
+    const p = pren(V.id), d = dettagli(p);
+    return header('Viaggio confermato', true) +
+      '<section class="card"><h2>' + esc(p.nome) + ' · ' + esc(dataLunga(fromIso(p.data))) + '</h2>' +
+      '<p>L\'operatore ti ha detto a che ora passa il bus. Scrivi qui gli orari.</p>' +
+      '<label for="pass-a">Il bus passa da ' + esc(d.da.nome) + ' alle<input type="time" id="pass-a" value="' + esc(p.passaggioAndata || (d.v.tipo === 'partita' ? '' : p.oraAndata)) + '"></label>' +
+      (d.v.ritorno ? '<label for="pass-r">Per il ritorno passa da ' + esc(d.a.nome) + ' alle<input type="time" id="pass-r" value="' + esc(p.passaggioRitorno || (d.v.tipo === 'partita' ? '' : p.oraRitorno)) + '"></label>' : '') +
+      '<button class="primary" data-a="salva-conferma" data-id="' + p.id + '">Salva</button></section>';
+  },
+
+  annulla(now) {
+    const p = pren(V.id);
+    if (p.stato !== 'confermata') {
+      return header('Non vado più', true) +
+        '<section class="card"><p>Il viaggio non è ancora confermato. Quando ti chiamano dalle 17:30, dì all\'operatore che <strong>non vai più</strong>.</p>' +
+        '<p>Oppure chiama tu il numero verde.</p></section>' + numeroBlock(callCenterAperto(now), prossimaFinestra(now), now) +
+        '<button class="danger" data-a="segna-annullata" data-id="' + p.id + '">Segna come annullato</button>';
+    }
+    const data = fromIso(p.data);
+    const primo = p.passaggioAndata ? toMin(p.passaggioAndata) : null;
+    const tardi = sameDay(data, now) && primo != null && primo - minOf(now) < 30;
+    const msg = messaggioCancellazione(p);
+    if (tardi) {
+      return header('Non vado più', true) +
+        '<section class="card signal stop"><div class="signal-head"><span class="lamp" aria-hidden="true"></span><h2>Manca meno di mezz\'ora</h2></div>' +
+        '<p>WhatsApp non basta più. Chiama subito il numero verde.</p><span class="big-number">' + NUMERO_VERDE + '</span>' +
+        '<a class="btn" href="tel:' + TEL + '">📞 Chiama</a></section>' +
+        '<button class="danger" data-a="segna-annullata" data-id="' + p.id + '">Ho avvisato: segna come annullato</button>';
+    }
+    return header('Non vado più', true) +
+      '<section class="card"><h2>Messaggio pronto</h2><p>Si apre WhatsApp con questo messaggio. Tu tocca solo <strong>Invia</strong>.</p>' +
+      '<div class="msg">' + esc(msg) + '</div>' +
+      '<a class="btn primary" href="https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">💬 Apri WhatsApp</a>' +
+      '<button class="quiet" data-a="copia-msg">Copia il messaggio</button>' +
+      '<p class="small">Numero WhatsApp di Amicobus, solo per annullare: ' + WA_SHOW + '. Scrivi almeno 30 minuti prima del passaggio.</p></section>' +
+      '<button class="danger" data-a="segna-annullata" data-id="' + p.id + '">✅ Ho mandato il messaggio</button>';
+  },
+
+  accredito() {
+    const sc = S.accredito && S.accredito.scadenza;
+    return header('Rinnovo iscrizione', true) +
+      '<section class="card"><h2>Ogni anno bisogna rinnovare</h2>' +
+      (sc ? '<p>La tua iscrizione scade il <strong>' + esc(dataLunga(fromIso(sc))) + '</strong>.</p>' : '') +
+      '<ol class="list-plain"><li>Entra nel portale SUS della Regione con lo <strong>SPID</strong>.</li>' +
+      '<li>Scegli la pratica “Agevolazioni tariffarie trasporto pubblico locale a favore degli invalidi e reduci di guerra e Servizio AmicoBus”.</li>' +
+      '<li>Compila il modulo e allega il certificato.</li></ol>' +
+      '<a class="btn primary" href="' + SUS_URL + '" target="_blank" rel="noopener">Apri il portale SUS</a></section>' +
+      '<h2>Chi ti aiuta gratis</h2><p class="small">Su appuntamento, per presentare la pratica.</p>' +
+      ASSOCIAZIONI.map(a => '<section class="card"><h3>' + esc(a.nome) + '</h3><p>' + esc(a.indirizzo) + '</p>' +
+        '<p><span class="big-number" style="font-size:1.25rem">' + esc(a.tel) + '</span></p>' +
+        '<div class="row"><a class="btn" href="tel:' + a.tel.replace(/\s/g, '') + '">📞 Chiama</a><a class="btn" href="mailto:' + esc(a.email) + '">✉️ Scrivi</a></div></section>').join('') +
+      '<section class="card"><label for="acc-data">Quando l\'hai rinnovata, scrivi qui la nuova scadenza<input type="date" id="acc-data" value="' + esc(sc || '') + '"></label>' +
+      '<button data-a="salva-accredito">Salva la scadenza</button></section>';
+  },
+
+  info() {
+    return header('Come funziona Amicobus', true) +
+      '<section class="card"><dl class="facts">' +
+      '<dt>Quando viaggia</dt><dd>Tutti i giorni, dalle 7:00 alle 20:00</dd>' +
+      '<dt>Dove</dt><dd>' + esc(COMUNI.join(', ')) + '</dd>' +
+      '<dt>Costo</dt><dd>' + euro(TARIFFA) + ' a tratta, ' + euro(TARIFFA * 2) + ' andata e ritorno</dd>' +
+      '<dt>Aiuto a bordo</dt><dd>Un assistente ti aiuta a salire, ad allacciare la cintura e a scendere</dd></dl></section>' +
+      '<section class="card"><h3>Quando si prenota</h3><dl class="facts">' +
+      '<dt>Per mar–ven</dt><dd>il giorno prima, 8:00–13:00</dd>' +
+      '<dt>Per sab e dom</dt><dd>il venerdì, 8:00–13:00</dd>' +
+      '<dt>Per il lunedì</dt><dd>il venerdì, 8:00–13:00 o 15:00–19:00</dd></dl>' +
+      '<p class="small">Gli stessi orari valgono per il telefono e per il sito.</p></section>' +
+      '<section class="card"><h3>Dopo la prenotazione</h3><p>Dalle 17:30 l\'operatore ti chiama per confermare e ti dice a che ora passa il bus. La prenotazione vale solo dopo questa telefonata.</p></section>' +
+      '<section class="card"><h3>Chi ha fatto questa app</h3>' +
+      '<p><strong>Il mio Amicobus non è un servizio ufficiale di CTM S.p.A.</strong> È uno strumento gratuito di iAvvocato che aiuta a usare il modulo online e il numero verde di CTM. Le prenotazioni le riceve e le conferma soltanto CTM.</p>' +
+      '<h3>I tuoi dati</h3>' +
+      '<p>L\'app non ha account, cookie né statistiche. Quello che inserisci resta in questo browser, su questo telefono. Quando prenoti, i dati vanno a CTM solo attraverso il suo modulo o la tua telefonata.</p>' +
+      '<p class="small">Informazioni sul servizio prese dal sito ctmcagliari.it (pagina Amicobus) a novembre 2026. In caso di differenze valgono le indicazioni di CTM.</p></section>' +
+      piede();
+  },
+
+  pin() {
+    return header('Impostazioni', true) +
+      '<section class="card"><h2>Scrivi il PIN</h2><p class="small">Le impostazioni sono per chi ti aiuta.' + (S.esempio ? ' PIN di prova: 1234.' : '') + '</p>' +
+      '<div class="pin-dots" aria-label="' + pinBuffer.length + ' cifre su 4">' + [0, 1, 2, 3].map(i => '<span class="' + (i < pinBuffer.length ? 'on' : '') + '"></span>').join('') + '</div>' +
+      (V.errore ? '<p class="notice">PIN sbagliato. Riprova.</p>' : '') +
+      '<div class="keypad">' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => '<button data-a="pin-n" data-n="' + n + '">' + n + '</button>').join('') +
+      '<button data-a="pin-c" aria-label="Cancella">⌫</button><button data-a="pin-n" data-n="0">0</button><span></span></div></section>';
+  },
+
+  config() {
+    const pr = S.profilo;
+    const optL = sel => S.luoghi.map(l => '<option value="' + esc(l.id) + '"' + (l.id === sel ? ' selected' : '') + '>' + esc(l.emoji + ' ' + l.nome) + '</option>').join('');
+    const optE = sel => EMOJI.map(e => '<option' + (e === sel ? ' selected' : '') + '>' + e + '</option>').join('');
+    const optC = sel => COMUNI.map(c => '<option' + (c === sel ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
+    return header('Impostazioni', true) +
+      (S.esempio ? '<section class="card signal warn"><p>Ci sono ancora i <strong>dati di esempio</strong>. Puoi modificarli o cancellarli tutti.</p><button data-a="svuota">Cancella l\'esempio e parti da zero</button></section>' : '') +
+
+      '<details class="card" open><summary>Persona che viaggia</summary>' +
+      '<div class="row"><label for="p-nome">Nome<input id="p-nome" data-p="profilo.nome" value="' + esc(pr.nome) + '" autocomplete="given-name"></label>' +
+      '<label for="p-cognome">Cognome<input id="p-cognome" data-p="profilo.cognome" value="' + esc(pr.cognome) + '" autocomplete="family-name"></label></div>' +
+      '<div class="row"><label for="p-tel">Telefono<input id="p-tel" type="tel" data-p="profilo.telefono" value="' + esc(pr.telefono) + '"></label>' +
+      '<label for="p-email">Email<input id="p-email" type="email" data-p="profilo.email" value="' + esc(pr.email) + '"></label></div>' +
+      '<label for="p-acc">Viaggia con<select id="p-acc" data-p="profilo.accompagnatore">' +
+      [['nessuno', 'Nessuno, da solo'], ['accompagnatore', 'Un accompagnatore'], ['minore', 'È minorenne, con accompagnatore']].map(o => '<option value="' + o[0] + '"' + (pr.accompagnatore === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></label>' +
+      '<label for="p-posto">Posto a sedere<select id="p-posto" data-p="profilo.posto">' +
+      [['normale', 'Posto normale'], ['carrozzina', 'Sedia a rotelle']].map(o => '<option value="' + o[0] + '"' + (pr.posto === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></label>' +
+      '<label for="p-acc-sc">Scadenza iscrizione Amicobus (SUS)<input id="p-acc-sc" type="date" data-p="accredito.scadenza" value="' + esc((S.accredito || {}).scadenza || '') + '"></label>' +
+      '</details>' +
+
+      '<details class="card"><summary>Luoghi</summary><p class="small">Solo negli 8 Comuni serviti, su strada asfaltata e pubblica.</p>' +
+      S.luoghi.map((l, i) => '<div class="edit-item"><div class="row"><label for="l-e-' + i + '" style="flex:0 0 90px">Simbolo<select id="l-e-' + i + '" data-p="luoghi.' + i + '.emoji">' + optE(l.emoji) + '</select></label>' +
+        '<label for="l-n-' + i + '">Nome<input id="l-n-' + i + '" data-p="luoghi.' + i + '.nome" value="' + esc(l.nome) + '"></label></div>' +
+        '<label for="l-i-' + i + '">Indirizzo<input id="l-i-' + i + '" data-p="luoghi.' + i + '.indirizzo" value="' + esc(l.indirizzo) + '"></label>' +
+        '<label for="l-c-' + i + '">Comune<select id="l-c-' + i + '" data-p="luoghi.' + i + '.citta">' + optC(l.citta) + '</select></label>' +
+        '<button class="quiet danger" data-a="del-luogo" data-i="' + i + '">Elimina luogo</button></div>').join('') +
+      '<button data-a="add-luogo">+ Aggiungi un luogo</button></details>' +
+
+      '<details class="card"><summary>Viaggi pronti</summary>' +
+      S.viaggi.map((v, i) => '<div class="edit-item"><div class="row"><label for="v-e-' + i + '" style="flex:0 0 90px">Simbolo<select id="v-e-' + i + '" data-p="viaggi.' + i + '.emoji">' + optE(v.emoji) + '</select></label>' +
+        '<label for="v-n-' + i + '">Nome<input id="v-n-' + i + '" data-p="viaggi.' + i + '.nome" value="' + esc(v.nome) + '"></label></div>' +
+        '<div class="row"><label for="v-da-' + i + '">Da<select id="v-da-' + i + '" data-p="viaggi.' + i + '.da">' + optL(v.da) + '</select></label>' +
+        '<label for="v-a-' + i + '">A<select id="v-a-' + i + '" data-p="viaggi.' + i + '.a">' + optL(v.a) + '</select></label></div>' +
+        (v.tipo === 'partita' ? '<p class="small">Viaggio per la partita: l\'orario si sceglie al momento della prenotazione.</p>' :
+          '<div class="row"><label for="v-oa-' + i + '">Ora di partenza<input id="v-oa-' + i + '" type="time" min="07:00" max="20:00" data-p="viaggi.' + i + '.oraAndata" value="' + esc(v.oraAndata) + '"></label>' +
+          '<label for="v-or-' + i + '">Ora di ritorno<input id="v-or-' + i + '" type="time" min="07:00" max="20:00" data-p="viaggi.' + i + '.oraRitorno" value="' + esc(v.oraRitorno) + '"' + (v.ritorno ? '' : ' disabled') + '></label></div>') +
+        '<label class="check" for="v-rit-' + i + '"><input type="checkbox" id="v-rit-' + i + '" data-p="viaggi.' + i + '.ritorno"' + (v.ritorno ? ' checked' : '') + '> Anche il ritorno</label>' +
+        '<button class="quiet danger" data-a="del-viaggio" data-i="' + i + '">Elimina viaggio</button></div>').join('') +
+      '<div class="row"><button data-a="add-viaggio">+ Aggiungi un viaggio</button><button data-a="add-partita">+ Viaggio per la partita</button></div></details>' +
+
+      '<details class="card"><summary>Compilazione automatica del sito</summary>' +
+      '<p>Per riempire il modulo di CTM da solo serve un piccolo script nel browser del telefono. Si installa una volta.</p>' +
+      '<h3>iPhone e iPad (Safari)</h3><ol class="list-plain"><li>Installa l\'app gratuita <strong>Userscripts</strong> dall\'App Store.</li><li>In Impostazioni → Safari → Estensioni attiva Userscripts e consenti l\'accesso a ctmcagliari.it.</li><li>Tocca “Copia lo script”, apri Userscripts, crea un nuovo script e incollalo.</li></ol>' +
+      '<h3>Android</h3><ol class="list-plain"><li>Installa <strong>Firefox</strong> e il componente aggiuntivo <strong>Violentmonkey</strong>.</li><li>Apri il link dello script qui sotto con Firefox e tocca Installa, oppure copialo e incollalo in un nuovo script.</li><li>Apri questa app con Firefox.</li></ol>' +
+      '<div class="row"><button data-a="copia-script">Copia lo script</button><a class="btn" href="amicobus.user.js" target="_blank" rel="noopener">Apri lo script</a></div>' +
+      '<p class="small">Lo script non invia nulla da solo: scrive i dati nel modulo. La casella del robot e il tasto Prenota restano alla persona.</p></details>' +
+
+      '<details class="card"><summary>Copia di sicurezza</summary>' +
+      '<p>I dati restano solo su questo telefono. Copia questo codice e conservalo, per esempio in una mail a te stesso. Serve anche per spostare i dati su un altro telefono.</p>' +
+      '<textarea id="backup-out" readonly>' + esc(b64url(S)) + '</textarea><button data-a="copia-backup">Copia il codice</button>' +
+      '<label for="backup-in">Incolla un codice per ripristinare<textarea id="backup-in"></textarea></label>' +
+      (V.esitoBackup ? '<p class="notice info">' + esc(V.esitoBackup) + '</p>' : '') +
+      '<button data-a="ripristina">Ripristina dal codice</button></details>' +
+
+      '<details class="card"><summary>Altro</summary>' +
+      '<label for="c-pin">PIN delle impostazioni (4 cifre)<input id="c-pin" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" data-p="pin" value="' + esc(S.pin) + '"></label>' +
+      '<label class="check" for="c-prova"><input type="checkbox" id="c-prova" data-p="prova"' + (S.prova ? ' checked' : '') + '> Modalità prova: ignora gli orari di prenotazione (solo per provare l\'app)</label>' +
+      (V.confermaReset ? '<p class="notice">Vuoi davvero cancellare tutti i dati da questo telefono?</p><div class="row"><button class="danger" data-a="reset-si">Sì, cancella tutto</button><button data-a="reset-no">No</button></div>'
+        : '<button class="quiet danger" data-a="reset">Cancella tutti i dati</button>') + '</details>' +
+      '<button class="primary" data-a="home">Fatto</button>';
+  }
+};
+
+function piede() {
+  return '<footer class="small" style="text-align:center;display:flex;flex-direction:column;gap:4px;padding-top:8px">' +
+    '<p>Non è un servizio ufficiale CTM. I dati restano su questo telefono.</p>' +
+    '<p>Realizzata da <a href="https://iavvocato.cloud" target="_blank" rel="noopener">iAvvocato</a> · <a href="https://github.com/iavvocato/apps" target="_blank" rel="noopener">codice aperto (MIT)</a></p></footer>';
+}
+
+function numeroBlock(aperto, pf, now) {
+  return '<section class="card ' + (aperto ? 'signal ok' : 'signal stop') + '"><div class="signal-head"><span class="lamp" aria-hidden="true"></span><h2>' + (aperto ? 'Il call center è aperto' : 'Il call center è chiuso') + '</h2></div>' +
+    (aperto ? '<p>Chiude alle <strong>' + hm(aperto[1]) + '</strong>.</p>' : (pf ? '<p>Riapre ' + esc(sameDay(pf.inizio, now) ? 'oggi' : dataLunga(pf.inizio)) + ' alle <strong>' + hm(minOf(pf.inizio)) + '</strong>.</p>' : '')) +
+    '<p class="small">Numero verde gratuito</p><span class="big-number">' + NUMERO_VERDE + '</span>' +
+    '<div class="row"><a class="btn yellow" href="tel:' + TEL + '">📞 Chiama</a><button data-a="copia-numero">Copia il numero</button></div></section>';
+}
+
+/* ---------- Disegno ---------- */
+function render() {
+  const now = new Date();
+  const fn = VIEWS[V.view] || VIEWS.home;
+  document.getElementById('app').innerHTML = fn(now);
+}
+
+/* ---------- Modifica impostazioni ---------- */
+function setPath(path, value) {
+  const parts = path.split('.');
+  let o = S;
+  for (let i = 0; i < parts.length - 1; i++) o = o[parts[i]] = o[parts[i]] || {};
+  o[parts[parts.length - 1]] = value;
+}
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (!el.dataset || !el.dataset.p) return;
+  const val = el.type === 'checkbox' ? el.checked : el.value;
+  if (el.dataset.p === 'pin' && !/^[0-9]{4}$/.test(val)) return;
+  setPath(el.dataset.p, val);
+  if (el.dataset.p !== 'prova' && el.dataset.p !== 'pin') S.esempio = false;
+  save();
+  if (el.type === 'checkbox' || el.tagName === 'SELECT') {
+    const open = [...document.querySelectorAll('details')].map(d => d.open);
+    render();
+    document.querySelectorAll('details').forEach((d, i) => { d.open = !!open[i]; });
+  }
+});
+
+/* ---------- Azioni ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]');
+  if (!el) return;
+  const a = el.dataset.a;
+  const now = new Date();
+  switch (a) {
+    case 'home': pinBuffer = ''; go('home'); break;
+    case 'scegli': go('scegli'); break;
+    case 'chiama': go('chiama'); break;
+    case 'info': go('info'); break;
+    case 'accredito': go('accredito'); break;
+    case 'viaggio': {
+      const v = viaggio(el.dataset.id);
+      V.viaggioId = v.id;
+      const ora = prenotabiliOra(now);
+      if (ora.length === 1) scegliData(v, iso(ora[0].data)); else go('giorno', { viaggioId: v.id });
+      break;
+    }
+    case 'data': scegliData(viaggio(V.viaggioId), el.dataset.d); break;
+    case 'orapartita': V.bozza.oraPartita = el.dataset.o; go('riepilogo', { bozza: V.bozza }); break;
+    case 'orapartita-altro': { const t = document.getElementById('partita-altro').value || '15:00'; V.bozza.oraPartita = t; go('riepilogo', { bozza: V.bozza }); break; }
+    case 'riepilogo': go('riepilogo', { bozza: V.bozza }); break;
+    case 'ascolta-riepilogo': {
+      const p = V.bozza, d = dettagli(p);
+      parla('Viaggio di ' + dataLunga(fromIso(p.data)) + '. Da ' + d.da.nome + ' a ' + d.a.nome + '. ' +
+        (d.v.tipo === 'partita' ? d.testoA + '.' : 'Andata alle ' + d.oraA + '.' + (d.v.ritorno ? ' Ritorno alle ' + d.oraR + '.' : '')) +
+        ' Costo ' + euro(TARIFFA * d.tratte).replace(' €', ' euro') + '.');
+      break;
+    }
+    case 'apriweb': setTimeout(() => go('web', { bozza: V.bozza }), 50); break;
+    case 'web-problema': go('web', { bozza: V.bozza, problema: true }); break;
+    case 'web-fatto': registra(V.bozza, 'web'); break;
+    case 'telefono': go('telefono', { bozza: V.bozza }); break;
+    case 'ascolta-copione': parla(copione(V.bozza).join(' ')); break;
+    case 'tel-fatto': registra(V.bozza, 'telefono'); break;
+    case 'copia-numero': copia(NUMERO_VERDE.replace(/\s/g, ''), el); break;
+    case 'conferma': go('conferma', { id: el.dataset.id }); break;
+    case 'salva-conferma': {
+      const p = pren(el.dataset.id);
+      p.passaggioAndata = (document.getElementById('pass-a') || {}).value || '';
+      const r = document.getElementById('pass-r'); if (r) p.passaggioRitorno = r.value || '';
+      p.stato = 'confermata'; save(); go('home'); break;
+    }
+    case 'rifiuta': { const p = pren(el.dataset.id); p.stato = 'rifiutata'; save(); render(); break; }
+    case 'annulla': go('annulla', { id: el.dataset.id }); break;
+    case 'copia-msg': copia(messaggioCancellazione(pren(V.id)), el); break;
+    case 'segna-annullata': { const p = pren(el.dataset.id); p.stato = 'annullata'; save(); go('home'); break; }
+    case 'togli': S.prenotazioni = S.prenotazioni.filter(p => p.id !== el.dataset.id); save(); render(); break;
+    case 'salva-accredito': { const v = document.getElementById('acc-data').value; S.accredito = { scadenza: v }; save(); go('home'); break; }
+    case 'pin': pinBuffer = ''; go('pin'); break;
+    case 'pin-n':
+      if (pinBuffer.length < 4) pinBuffer += el.dataset.n;
+      if (pinBuffer.length === 4) {
+        if (pinBuffer === S.pin) { pinBuffer = ''; go('config'); } else { pinBuffer = ''; go('pin', { errore: true }); }
+      } else render();
+      break;
+    case 'pin-c': pinBuffer = pinBuffer.slice(0, -1); render(); break;
+    case 'svuota':
+      S = { v: 1, esempio: false, pin: S.pin, prova: S.prova, profilo: { nome: '', cognome: '', telefono: '', email: '', accompagnatore: 'nessuno', posto: 'normale' }, accredito: { scadenza: '' }, luoghi: [{ id: uid(), nome: 'Casa', emoji: '🏠', indirizzo: '', citta: 'Cagliari' }], viaggi: [], prenotazioni: [] };
+      save(); go('config'); break;
+    case 'add-luogo': S.luoghi.push({ id: uid(), nome: 'Nuovo luogo', emoji: '🏢', indirizzo: '', citta: 'Cagliari' }); S.esempio = false; save(); reopen(1); break;
+    case 'del-luogo': S.luoghi.splice(+el.dataset.i, 1); save(); reopen(1); break;
+    case 'add-viaggio': {
+      const casa = S.luoghi[0], altro = S.luoghi[1] || S.luoghi[0];
+      S.viaggi.push({ id: uid(), tipo: 'normale', emoji: '🏫', nome: 'Nuovo viaggio', da: casa ? casa.id : '', a: altro ? altro.id : '', oraAndata: '09:00', ritorno: true, oraRitorno: '12:00' });
+      S.esempio = false; save(); reopen(2); break;
+    }
+    case 'add-partita': {
+      let st = S.luoghi.find(l => l.emoji === '⚽');
+      if (!st) { st = { id: uid(), nome: 'Stadio (Distinti)', emoji: '⚽', indirizzo: 'Unipol Domus, ingresso dedicato settore Distinti', citta: 'Cagliari' }; S.luoghi.push(st); }
+      const casa = S.luoghi[0];
+      S.viaggi.push({ id: uid(), tipo: 'partita', emoji: '⚽', nome: 'Partita del Cagliari', da: casa.id, a: st.id, oraAndata: '', ritorno: true, oraRitorno: '' });
+      save(); reopen(2); break;
+    }
+    case 'del-viaggio': S.viaggi.splice(+el.dataset.i, 1); save(); reopen(2); break;
+    case 'copia-script':
+      fetch('amicobus.user.js').then(r => r.text()).then(t => copia(t, el)).catch(() => { el.textContent = 'Non riesco a leggere lo script'; });
+      break;
+    case 'copia-backup': copia(document.getElementById('backup-out').value, el); break;
+    case 'ripristina': {
+      try {
+        const s = fromB64url(document.getElementById('backup-in').value);
+        if (!s || s.v !== 1 || !s.profilo) throw new Error('formato');
+        S = s; save(); go('config', { esitoBackup: 'Dati ripristinati.' });
+      } catch (err) { go('config', { esitoBackup: 'Il codice non è valido. Controlla di averlo copiato tutto.' }); }
+      break;
+    }
+    case 'reset': go('config', { confermaReset: true }); break;
+    case 'reset-no': go('config'); break;
+    case 'reset-si': try { localStorage.removeItem(STORE); } catch (err) {} S = esempio(); go('home'); break;
+  }
+});
+
+function reopen(idx) {
+  render();
+  const ds = document.querySelectorAll('details');
+  ds.forEach((d, i) => { d.open = i === idx; });
+}
+function scegliData(v, dataIso) {
+  const bozza = richiestaDa(v, dataIso);
+  if (v.tipo === 'partita') go('partita', { bozza }); else go('riepilogo', { bozza });
+}
+function registra(bozza, canale) {
+  if (!S.prenotazioni.find(p => p.id === bozza.id)) {
+    bozza.stato = 'inviata'; bozza.canale = canale;
+    S.prenotazioni.push(bozza);
+    save();
+  }
+  go('home');
+}
+
+render();
+/* Il semaforo si aggiorna da solo ogni minuto, solo nella schermata iniziale. */
+setInterval(() => { if (V.view === 'home') render(); }, 60000);
+})();
+</script>
+</body>
+</html>
