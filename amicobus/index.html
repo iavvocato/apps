@@ -117,7 +117,8 @@ button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visi
 .pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 12px; font-size: 0.86rem; font-weight: 700; align-self: flex-start; }
 .pill.inviata { background: var(--warn-bg); color: var(--warn); }
 .pill.confermata { background: var(--ok-bg); color: var(--ok); }
-.pill.annullata, .pill.rifiutata { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.pill.bozza { background: var(--accent); color: var(--accent-ink); }
+.pill.annullata, .pill.rifiutata, .pill.scaduta { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
 .steps { display: flex; gap: 6px; }
 .steps span { flex: 1; height: 8px; border-radius: 4px; background: var(--line); }
 .steps span.on { background: var(--ok); }
@@ -239,6 +240,18 @@ function prossimaFinestra(now) {
   }
   return null;
 }
+/* Per un giorno di viaggio: si può prenotare adesso, più avanti (con l'orario di apertura) o è troppo tardi. */
+function finestraPer(dataViaggio, now) {
+  if (S.prova) return { stato: 'ora', fine: null };
+  const r = giornoPrenotazione(dataViaggio);
+  for (const w of r.finestre) {
+    const inizio = new Date(r.giorno); inizio.setMinutes(w[0]);
+    const fine = new Date(r.giorno); fine.setMinutes(w[1]);
+    if (now < inizio) return { stato: 'dopo', inizio, fine };
+    if (now < fine) return { stato: 'ora', fine: w[1] };
+  }
+  return { stato: 'tardi' };
+}
 function callCenterAperto(now) {
   const m = minOf(now);
   return (FINESTRE[now.getDay()] || []).find(w => m >= w[0] && m < w[1]) || null;
@@ -307,7 +320,7 @@ function dettagli(p) {
 }
 function richiestaDa(viaggioObj, dataIso, oraPartita) {
   return {
-    id: uid(), viaggioId: viaggioObj.id, data: dataIso, stato: 'bozza', canale: null, creata: new Date().toISOString(),
+    id: uid(), viaggioId: viaggioObj.id, data: dataIso, stato: 'nuova', canale: null, creata: new Date().toISOString(),
     emoji: viaggioObj.emoji, nome: viaggioObj.nome, tipo: viaggioObj.tipo, da: viaggioObj.da, a: viaggioObj.a,
     ritorno: viaggioObj.ritorno, oraAndata: viaggioObj.oraAndata, oraRitorno: viaggioObj.oraRitorno,
     oraPartita: oraPartita || null, passaggioAndata: '', passaggioRitorno: ''
@@ -366,6 +379,74 @@ function messaggioCancellazione(p) {
   t += 'Grazie.';
   return t;
 }
+/* ---------- Promemoria nel calendario ---------- */
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function linkApp(p) { return location.origin + location.pathname + '#bozza-' + p.id; }
+function icsTesto(s) { return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
+function icsData(d) { return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00'; }
+function icsUTC(d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
+function icsPiega(riga) {
+  const enc = new TextEncoder(); const out = []; let cur = '', n = 0;
+  for (const ch of riga) {
+    const b = enc.encode(ch).length;
+    if (n + b > 73) { out.push(cur); cur = ' '; n = 1; }
+    cur += ch; n += b;
+  }
+  out.push(cur); return out.join('\r\n');
+}
+function promemoriaDati(p) {
+  const d = dettagli(p);
+  const inizio = new Date(p.apertura), fine = new Date(p.chiusura);
+  const titolo = 'Prenota Amicobus: ' + p.nome + ' (' + dataLunga(fromIso(p.data)) + ')';
+  const testo = 'Da adesso puoi mandare la prenotazione di Amicobus per ' + dataLunga(fromIso(p.data)) + ': ' +
+    (d.da.nome || '') + ' → ' + (d.a.nome || '') + '. Hai tempo fino alle ' + hm(minOf(fine)) + '.\n' +
+    'Tocca qui per aprire l\'app con il viaggio già pronto: ' + linkApp(p);
+  return { inizio, fine, titolo, testo };
+}
+function icsPer(p) {
+  const m = promemoriaDati(p);
+  const fineEvento = new Date(m.inizio.getTime() + 30 * 60000);
+  const ultimaOra = Math.max(0, Math.round((m.fine - m.inizio) / 60000) - 60);
+  const righe = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//iAvvocato//Il mio Amicobus//IT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VTIMEZONE', 'TZID:Europe/Rome',
+    'BEGIN:DAYLIGHT', 'TZOFFSETFROM:+0100', 'TZOFFSETTO:+0200', 'TZNAME:CEST', 'DTSTART:19700329T020000', 'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU', 'END:DAYLIGHT',
+    'BEGIN:STANDARD', 'TZOFFSETFROM:+0200', 'TZOFFSETTO:+0100', 'TZNAME:CET', 'DTSTART:19701025T030000', 'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU', 'END:STANDARD',
+    'END:VTIMEZONE',
+    'BEGIN:VEVENT',
+    'UID:' + p.id + '@apps.iavvocato.cloud',
+    'DTSTAMP:' + icsUTC(new Date()),
+    'DTSTART;TZID=Europe/Rome:' + icsData(m.inizio),
+    'DTEND;TZID=Europe/Rome:' + icsData(fineEvento),
+    'SUMMARY:' + icsTesto('🚌 ' + m.titolo),
+    'DESCRIPTION:' + icsTesto(m.testo),
+    'URL:' + linkApp(p),
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:PT0M', 'DESCRIPTION:' + icsTesto('È il momento di prenotare Amicobus'), 'END:VALARM',
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:PT' + ultimaOra + 'M', 'DESCRIPTION:' + icsTesto('Ultima ora per prenotare Amicobus'), 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'
+  ];
+  return righe.map(icsPiega).join('\r\n') + '\r\n';
+}
+function linkGoogleCalendar(p) {
+  const m = promemoriaDati(p);
+  const fineEvento = new Date(m.inizio.getTime() + 30 * 60000);
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+    '&text=' + encodeURIComponent('🚌 ' + m.titolo) +
+    '&dates=' + icsData(m.inizio) + '/' + icsData(fineEvento) +
+    '&ctz=Europe/Rome' +
+    '&details=' + encodeURIComponent(m.testo);
+}
+function hrefIcs(p) {
+  const ics = icsPer(p);
+  if (isIOS()) return { href: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics), download: '' };
+  try { return { href: URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' })), download: 'amicobus-promemoria.ics' }; }
+  catch (e) { return { href: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics), download: 'amicobus-promemoria.ics' }; }
+}
+function quandoAperta(inizio, fine, now) {
+  const g = sameDay(inizio, now) ? 'oggi' : sameDay(inizio, addDays(dayStart(now), 1)) ? 'domani, ' + dataLunga(inizio) : dataLunga(inizio);
+  return g + ', dalle ' + hm(minOf(inizio)) + ' alle ' + hm(minOf(fine));
+}
+
 function datiMancanti(v) {
   const m = [];
   if (!S.profilo.nome || !S.profilo.cognome) m.push('nome e cognome');
@@ -432,10 +513,26 @@ function avvisoAccredito(now) {
 function cardPrenotazione(p, now) {
   const d = dettagli(p);
   const data = fromIso(p.data);
-  const etichette = { inviata: 'Aspetto la telefonata', confermata: 'Confermato', annullata: 'Annullato', rifiutata: 'Non confermato' };
-  const passi = { inviata: 1, confermata: 2, annullata: 3, rifiutata: 3 };
+  const etichette = { bozza: 'Da mandare', inviata: 'Aspetto la telefonata', confermata: 'Confermato', annullata: 'Annullato', rifiutata: 'Non confermato' };
+  const passi = { bozza: 0, inviata: 1, confermata: 2, annullata: 3, rifiutata: 3 };
   let corpo = '';
-  if (p.stato === 'inviata') {
+  let stato = p.stato;
+  if (p.stato === 'bozza') {
+    const f = finestraPer(data, now);
+    if (f.stato === 'ora') {
+      corpo = '<p>🟢 <strong>È il momento:</strong> adesso puoi mandare la prenotazione' + (f.fine ? ', fino alle <strong>' + hm(f.fine) + '</strong>' : '') + '.</p>' +
+        '<button class="primary" data-a="apri-bozza" data-id="' + p.id + '">🚌 Manda adesso</button>' +
+        '<button class="quiet danger" data-a="togli" data-id="' + p.id + '">Elimina</button>';
+    } else if (f.stato === 'dopo') {
+      corpo = '<p>⏰ Potrai mandarla <strong>' + esc(quandoAperta(f.inizio, f.fine, now)) + '</strong>.</p>' +
+        '<div class="row"><button data-a="promemoria" data-id="' + p.id + '">📅 Promemoria nel calendario</button>' +
+        '<button class="quiet danger" data-a="togli" data-id="' + p.id + '">Elimina</button></div>';
+    } else {
+      stato = 'scaduta';
+      corpo = '<p>Il tempo per prenotare questo viaggio è finito. Se ti serve ancora, chiama il numero verde.</p>' +
+        '<button class="quiet" data-a="togli" data-id="' + p.id + '">Togli dalla lista</button>';
+    }
+  } else if (p.stato === 'inviata') {
     const g = giornoPrenotazione(data).giorno;
     corpo = '<p>📞 Dalle <strong>17:30</strong> di ' + esc(sameDay(g, now) ? 'oggi' : dataLunga(g)) + ' ti chiamano per dirti se il viaggio è confermato. Tieni il telefono vicino.</p>' +
       '<div class="row"><button class="yellow" data-a="conferma" data-id="' + p.id + '">✅ Mi hanno chiamato: è confermato</button>' +
@@ -450,8 +547,8 @@ function cardPrenotazione(p, now) {
     corpo = '<button class="quiet" data-a="togli" data-id="' + p.id + '">Togli dalla lista</button>';
   }
   return '<article class="card"><div class="row" style="align-items:center"><h3 style="flex:3 1 200px"><span aria-hidden="true">' + esc(p.emoji) + '</span> ' + esc(p.nome) + '</h3>' +
-    '<span class="pill ' + p.stato + '">' + etichette[p.stato] + '</span></div>' +
-    '<p><strong>' + esc(dataUmana(data, now)) + '</strong> · ' + (p.canale === 'telefono' ? 'prenotato al telefono' : 'prenotato sul sito') + '</p>' +
+    '<span class="pill ' + stato + '">' + (stato === 'scaduta' ? 'Troppo tardi' : etichette[p.stato]) + '</span></div>' +
+    '<p><strong>' + esc(dataUmana(data, now)) + '</strong> · ' + (p.stato === 'bozza' ? 'non ancora mandata' : p.canale === 'telefono' ? 'prenotato al telefono' : 'prenotato sul sito') + '</p>' +
     (p.stato === 'inviata' || p.stato === 'confermata' ? '<div class="steps" aria-hidden="true"><span class="on"></span><span class="' + (passi[p.stato] >= 2 ? 'on' : '') + '"></span></div>' : '') +
     corpo + '</article>';
 }
@@ -459,12 +556,13 @@ function cardPrenotazione(p, now) {
 /* ---------- Schermate ---------- */
 const VIEWS = {
   home(now) {
-    const attive = S.prenotazioni.filter(p => p.stato !== 'bozza' && fromIso(p.data) >= dayStart(now)).sort((a, b) => a.data.localeCompare(b.data));
+    const attive = S.prenotazioni.filter(p => fromIso(p.data) >= dayStart(now)).sort((a, b) => a.data.localeCompare(b.data));
+    const aperto = prenotabiliOra(now).length > 0;
     return header() +
       (S.esempio ? '<p class="notice">Questi sono <strong>dati di esempio</strong>. Chi ti aiuta può inserire i tuoi dati in ⚙️ Impostazioni.</p>' : '') +
       (!storageOk ? '<p class="notice">Questo browser non salva i dati. Le prenotazioni si perdono quando chiudi la pagina.</p>' : '') +
       semaforo(now) +
-      '<button class="primary" data-a="scegli">🚌 Prenota un viaggio</button>' +
+      '<button class="primary" data-a="scegli">' + (aperto ? '🚌 Prenota un viaggio' : '📝 Prepara un viaggio per dopo') + '</button>' +
       avvisoAccredito(now) +
       '<h2>I miei viaggi</h2>' +
       (attive.length ? attive.map(p => cardPrenotazione(p, now)).join('') : '<p class="card small">Non hai viaggi prenotati. Quando prenoti, il viaggio compare qui.</p>') +
@@ -474,12 +572,9 @@ const VIEWS = {
 
   scegli(now) {
     const ora = prenotabiliOra(now);
-    if (!ora.length) {
-      return header('Prenota', true) + semaforo(now) +
-        '<p>Il call center e il sito accettano le prenotazioni solo in questi orari. Torna quando il semaforo è verde.</p>';
-    }
     if (!S.viaggi.length) return header('Prenota', true) + '<p class="notice">Non ci sono viaggi pronti. Chi ti aiuta può prepararli in ⚙️ Impostazioni.</p>';
     return header('Dove vuoi andare?', true) +
+      (ora.length ? '' : '<p class="notice info">Adesso non si può mandare la prenotazione. Puoi <strong>prepararla</strong>: l\'app la salva e ti ricorda quando mandarla.</p>') +
       '<div class="tiles">' + S.viaggi.map(v => {
         const a = luogo(v.a) || {};
         return '<button class="tile" data-a="viaggio" data-id="' + v.id + '"><span class="emoji" aria-hidden="true">' + esc(v.emoji) + '</span>' + esc(v.nome) +
@@ -489,10 +584,22 @@ const VIEWS = {
 
   giorno(now) {
     const v = viaggio(V.viaggioId);
-    const ora = prenotabiliOra(now);
+    const giorni = [];
+    for (let k = 1; k <= 8; k++) {
+      const d = addDays(dayStart(now), k);
+      const f = finestraPer(d, now);
+      if (f.stato !== 'tardi') giorni.push({ d, f });
+    }
+    const subito = giorni.filter(g => g.f.stato === 'ora');
+    const dopo = giorni.filter(g => g.f.stato === 'dopo');
     return header('Quando?', true) +
       '<p><span aria-hidden="true">' + esc(v.emoji) + '</span> <strong>' + esc(v.nome) + '</strong></p>' +
-      '<div class="stack">' + ora.map(o => '<button class="primary" data-a="data" data-d="' + iso(o.data) + '">' + esc(dataUmana(o.data, now)) + '</button>').join('') + '</div>';
+      (subito.length ? '<h2>Puoi prenotare adesso</h2><div class="stack">' +
+        subito.map(g => '<button class="primary" data-a="data" data-d="' + iso(g.d) + '">' + esc(dataUmana(g.d, now)) + '</button>').join('') + '</div>' : '') +
+      (dopo.length ? '<h2>' + (subito.length ? 'Oppure preparalo per dopo' : 'Prepara il viaggio') + '</h2>' +
+        '<p class="small">L\'app lo salva e ti ricorda quando mandarlo.</p><div class="stack">' +
+        dopo.map(g => '<button data-a="data" data-d="' + iso(g.d) + '" style="flex-direction:column;gap:2px">' + esc(dataUmana(g.d, now)) +
+          '<span class="small" style="font-weight:400">si manda ' + esc(quandoAperta(g.f.inizio, g.f.fine, now)) + '</span></button>').join('') + '</div>' : '');
   },
 
   partita() {
@@ -519,6 +626,16 @@ const VIEWS = {
       '<button data-a="ascolta-riepilogo">🔊 Ascolta</button></section>';
     if (mancano.length) {
       return h + '<p class="notice">Mancano dei dati: <strong>' + esc(mancano.join(', ')) + '</strong>. Chiedi a chi ti aiuta di inserirli in ⚙️ Impostazioni.</p>';
+    }
+    const f = finestraPer(fromIso(p.data), now);
+    if (f.stato === 'tardi') {
+      return h + '<p class="notice">Il tempo per prenotare questo viaggio è finito. Se ti serve ancora, chiama il numero verde ' + NUMERO_VERDE + '.</p>';
+    }
+    if (f.stato === 'dopo') {
+      return h + '<section class="card signal warn"><div class="signal-head"><span class="lamp" aria-hidden="true"></span><h2>Adesso non si può ancora mandare</h2></div>' +
+        '<p>Potrai mandarla <strong>' + esc(quandoAperta(f.inizio, f.fine, now)) + '</strong>.</p>' +
+        '<p>Salvala adesso: la trovi tra i tuoi viaggi, già pronta. Poi aggiungi il promemoria al calendario del telefono.</p></section>' +
+        '<button class="primary" data-a="salva-bozza">💾 Salva e ricordamelo</button>';
     }
     if (carrozzina) h += '<p class="notice">Sul sito non c\'è la casella per la <strong>sedia a rotelle</strong>. È meglio prenotare al telefono, così lo dici all\'operatore.</p>';
     const web = '<a class="btn ' + (carrozzina ? '' : 'primary') + '" href="' + esc(linkCTM(p)) + '" target="_blank" rel="noopener" data-a="apriweb">🌐 Prenota sul sito CTM</a>';
@@ -548,6 +665,24 @@ const VIEWS = {
       (p ? '<section class="card"><h2>Cosa dire</h2><ol class="script">' + righe.map(r => '<li>' + esc(r) + '</li>').join('') + '</ol>' +
         '<button data-a="ascolta-copione">🔊 Ascolta</button></section>' +
         '<button class="primary" data-a="tel-fatto">✅ Ho prenotato al telefono</button>' : '');
+  },
+
+  promemoria(now) {
+    const p = pren(V.id);
+    if (!p) return header('Promemoria', true);
+    const d = dettagli(p);
+    const inizio = new Date(p.apertura), fine = new Date(p.chiusura);
+    const ics = hrefIcs(p);
+    return header('Promemoria', true) +
+      (V.salvata ? '<p class="notice info">✅ Viaggio salvato tra i tuoi viaggi.</p>' : '') +
+      '<section class="card"><h2>' + esc(p.nome) + ' · ' + esc(dataLunga(fromIso(p.data))) + '</h2>' + routeBlock(d) +
+      '<p>Si potrà mandare <strong>' + esc(quandoAperta(inizio, fine, now)) + '</strong>.</p></section>' +
+      '<section class="card"><h2>Aggiungi il promemoria al calendario</h2>' +
+      '<p>Il telefono ti avvisa all\'apertura e un\'ora prima della chiusura. Nel promemoria c\'è il link per tornare qui e mandare la prenotazione.</p>' +
+      '<a class="btn primary" href="' + esc(ics.href) + '"' + (ics.download ? ' download="' + esc(ics.download) + '"' : '') + '>📅 Aggiungi al calendario</a>' +
+      '<a class="btn" href="' + esc(linkGoogleCalendar(p)) + '" target="_blank" rel="noopener">Usa Google Calendar</a>' +
+      '<p class="small">Su iPhone tocca “Aggiungi tutto”. Su Android, se si scarica un file, aprilo con l\'app Calendario, oppure usa Google Calendar.</p></section>' +
+      '<button data-a="home">Fatto</button>';
   },
 
   chiama(now) {
@@ -759,11 +894,19 @@ document.addEventListener('click', e => {
     case 'accredito': go('accredito'); break;
     case 'viaggio': {
       const v = viaggio(el.dataset.id);
-      V.viaggioId = v.id;
-      const ora = prenotabiliOra(now);
-      if (ora.length === 1) scegliData(v, iso(ora[0].data)); else go('giorno', { viaggioId: v.id });
+      go('giorno', { viaggioId: v.id });
       break;
     }
+    case 'salva-bozza': {
+      const p = V.bozza;
+      const f = finestraPer(fromIso(p.data), now);
+      if (f.stato !== 'dopo') { render(); break; }
+      p.stato = 'bozza'; p.apertura = f.inizio.toISOString(); p.chiusura = f.fine.toISOString();
+      if (!S.prenotazioni.find(x => x.id === p.id)) S.prenotazioni.push(p);
+      save(); go('promemoria', { id: p.id, salvata: true }); break;
+    }
+    case 'promemoria': go('promemoria', { id: el.dataset.id }); break;
+    case 'apri-bozza': { const p = pren(el.dataset.id); if (p) go('riepilogo', { bozza: p }); break; }
     case 'data': scegliData(viaggio(V.viaggioId), el.dataset.d); break;
     case 'orapartita': V.bozza.oraPartita = el.dataset.o; go('riepilogo', { bozza: V.bozza }); break;
     case 'orapartita-altro': { const t = document.getElementById('partita-altro').value || '15:00'; V.bozza.oraPartita = t; go('riepilogo', { bozza: V.bozza }); break; }
@@ -849,15 +992,26 @@ function scegliData(v, dataIso) {
   if (v.tipo === 'partita') go('partita', { bozza }); else go('riepilogo', { bozza });
 }
 function registra(bozza, canale) {
-  if (!S.prenotazioni.find(p => p.id === bozza.id)) {
-    bozza.stato = 'inviata'; bozza.canale = canale;
-    S.prenotazioni.push(bozza);
-    save();
-  }
+  bozza.stato = 'inviata'; bozza.canale = canale;
+  delete bozza.apertura; delete bozza.chiusura;
+  if (!S.prenotazioni.find(p => p.id === bozza.id)) S.prenotazioni.push(bozza);
+  save();
   go('home');
 }
 
-render();
+/* Dal promemoria del calendario si arriva con #bozza-<id>: apre direttamente quel viaggio. */
+function apriDaIndirizzo() {
+  const m = /^#bozza-([a-z0-9]+)$/.exec(location.hash || '');
+  if (!m) return false;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  const p = pren(m[1]);
+  if (!p) { go('home'); return true; }
+  if (p.stato === 'bozza') go('riepilogo', { bozza: p }); else go('home');
+  return true;
+}
+window.addEventListener('hashchange', apriDaIndirizzo);
+
+if (!apriDaIndirizzo()) render();
 /* Il semaforo si aggiorna da solo ogni minuto, solo nella schermata iniziale. */
 setInterval(() => { if (V.view === 'home') render(); }, 60000);
 })();
