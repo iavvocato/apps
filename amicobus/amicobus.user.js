@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Il mio Amicobus – compila il modulo CTM
 // @namespace    il-mio-amicobus
-// @version      0.1.0
+// @version      0.2.0
 // @description  Compila il modulo di prenotazione Amicobus di CTM con i dati preparati nell'app "Il mio Amicobus". Non invia nulla da solo: la casella "Non sono un robot" e il tasto Prenota restano alla persona.
 // @author       iAvvocato
 // @homepageURL  https://apps.iavvocato.cloud/amicobus/
@@ -54,20 +54,37 @@
       return;
     }
 
+    // La pagina CTM carica jQuery due volte: i suoi gestori stanno sulla prima copia, window.jQuery
+    // è la seconda. Per raggiungerli servono eventi nativi del browser, non trigger() di jQuery.
+    function nativo(el, tipo) { el.dispatchEvent(new Event(tipo, { bubbles: true })); }
+
     function setText(sel, value) {
       if (value === undefined || value === null || value === '') return;
-      var $el = $(sel);
-      if (!$el.length) return;
-      $el.val(value).trigger('input').trigger('change');
-      $el.siblings('label').addClass('active');
+      var el = document.querySelector(sel);
+      if (!el) return;
+      el.value = value;
+      nativo(el, 'input');
+      nativo(el, 'change');
+      $(el).siblings('label').addClass('active');
     }
 
     function setRadio(name, value) {
       if (!value) return;
       var el = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
       if (!el) return;
-      el.checked = true;
-      $(el).trigger('change');
+      if (!el.checked) el.click();   // tocco simulato: seleziona e avvisa tutti i gestori
+      else nativo(el, 'change');
+    }
+
+    // Rete di sicurezza: mostra comunque le sezioni giuste anche se la pagina non reagisce.
+    function mostraSezioni(tipo) {
+      function vedi(sel, si) {
+        var els = document.querySelectorAll(sel);
+        for (var i = 0; i < els.length; i++) els[i].style.display = si ? '' : 'none';
+      }
+      vedi('.andata', true);
+      vedi('.submit-area', true);
+      vedi('.ritorno', tipo === 'andataritorno');
     }
 
     function setDate(iso) {
@@ -91,6 +108,7 @@
     setDate(data.d);
     setRadio('sedia_rotelle', data.acc);
     setRadio('tipo_viaggio', data.tipo);
+    mostraSezioni(data.tipo);
 
     if (data.a) {
       setText('#amicobus__a_partenza_da', data.a.p);
