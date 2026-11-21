@@ -32,11 +32,14 @@ p { margin: 0; }
 .muted { color: var(--muted); font-size: 0.92rem; }
 a { color: var(--accent); }
 .app { display: grid; grid-template-columns: 72px 1fr; gap: 16px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; text-decoration: none; color: inherit; }
-.app:hover { border-color: var(--accent); }
-.app:focus-visible { outline: 4px solid #F2B705; outline-offset: 2px; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.go { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; border-radius: 12px; border: 2px solid var(--accent); text-decoration: none; }
+.go:focus-visible { outline: 4px solid #F2B705; outline-offset: 2px; }
 .app img { width: 72px; height: 72px; border-radius: 16px; }
 .app div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .app .go { color: var(--accent); font-weight: 700; }
+.app .go.primary { color: var(--surface); background: var(--accent); }
+.app .links { flex-direction: row; }
 </style>
 </head>
 <body>
@@ -46,15 +49,18 @@ a { color: var(--accent); }
     <p class="muted">Piccoli strumenti gratuiti per risolvere problemi pratici. Si aprono dal browser e si possono salvare sulla schermata Home del telefono.</p>
   </header>
 
-  <a class="app" href="amicobus/">
+  <article class="app">
     <img src="amicobus/icon-192.png" alt="">
     <div>
       <h2>Il mio Amicobus</h2>
-      <p>Per prenotare il bus Amicobus di CTM Cagliari, il servizio a chiamata per persone con disabilità: viaggi già pronti, orari di prenotazione, telefonata guidata, annullamento su WhatsApp.</p>
+      <p>Per prenotare il bus Amicobus di CTM Cagliari, il servizio a chiamata per persone con disabilità: viaggi già pronti, orari di prenotazione, telefonata guidata, promemoria nel calendario, annullamento su WhatsApp.</p>
       <p class="muted">Non è un servizio ufficiale CTM.</p>
-      <span class="go">Apri l'app →</span>
+      <div class="links">
+        <a class="go primary" href="amicobus/guida/">Guida e istruzioni</a>
+        <a class="go" href="amicobus/">Apri l'app →</a>
+      </div>
     </div>
-  </a>
+  </article>
 
   <footer class="muted">
     <p>Le app non usano account, cookie o statistiche: i dati restano sul telefono di chi le usa.</p>

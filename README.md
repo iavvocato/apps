@@ -6,13 +6,14 @@ Ogni app sta in una cartella propria ed è una pagina web statica: niente server
 
 | App | Indirizzo | Cosa fa |
 | --- | --- | --- |
-| Il mio Amicobus | [apps.iavvocato.cloud/amicobus/](https://apps.iavvocato.cloud/amicobus/) | Prenotazione semplificata di Amicobus, il servizio a chiamata di CTM Cagliari per persone con disabilità |
+| Il mio Amicobus | [guida](https://apps.iavvocato.cloud/amicobus/guida/) · [app](https://apps.iavvocato.cloud/amicobus/) | Prenotazione semplificata di Amicobus, il servizio a chiamata di CTM Cagliari per persone con disabilità |
 
 ## Il mio Amicobus
 
 Non è un servizio ufficiale di CTM S.p.A. Aiuta a usare i canali di prenotazione di CTM (modulo online e numero verde 800 259 745).
 
 - `amicobus/index.html`: l'app, in un solo file (HTML, CSS e JavaScript senza librerie).
+- `amicobus/guida/`: presentazione e istruzioni passo per passo per iPhone e Android, con screenshot (dati di esempio; i dati personali visibili negli screenshot originali sono stati coperti). È la pagina da linkare per far conoscere l'app.
 - `amicobus/amicobus.user.js`: script per Userscripts (Safari su iPhone) o Violentmonkey (Firefox su Android). Compila il modulo di [ctmcagliari.it/prenotazione-servizio](https://www.ctmcagliari.it/prenotazione-servizio/) con i dati preparati nell'app. Non invia nulla: la casella reCAPTCHA e il tasto Prenota restano alla persona. I dati arrivano nell'indirizzo dopo il `#` e lo script li toglie dalla barra degli indirizzi appena la pagina si apre.
 - `amicobus/manifest.webmanifest` e le icone: nome e icona quando l'app viene aggiunta alla schermata Home.
 
