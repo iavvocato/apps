@@ -70,7 +70,7 @@ h3 { font-size: 1.08rem; }
 p { margin: 0; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
 .brand { display: flex; align-items: center; gap: 10px; }
-.brand-mark { width: 44px; height: 44px; border-radius: 12px; background: var(--bus); display: grid; place-items: center; font-size: 26px; flex: none; }
+.brand-mark { width: 44px; height: 44px; border-radius: 11px; flex: none; display: block; }
 .small { font-size: 0.86rem; color: var(--muted); }
 .stack { display: flex; flex-direction: column; gap: 12px; }
 .row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -480,7 +480,7 @@ async function copia(testo, btn) {
 
 /* ---------- Pezzi di interfaccia ---------- */
 function header(titolo, conIndietro) {
-  return '<div class="top"><div class="brand"><div class="brand-mark" aria-hidden="true">🚌</div><div><h1>' + esc(titolo || 'Il mio Amicobus') + '</h1>' +
+  return '<div class="top"><div class="brand"><img class="brand-mark" src="icon-192.png" alt=""><div><h1>' + esc(titolo || 'Il mio Amicobus') + '</h1>' +
     (V.view === 'home' ? '<p class="small">Prenoto il bus Amicobus di CTM</p>' : '') + '</div></div>' +
     (V.view === 'home' ? '<button class="quiet" data-a="pin">⚙️ Impostazioni</button>' : '') + '</div>' +
     (conIndietro ? '<button class="back" data-a="home">← Torna all\'inizio</button>' : '');
