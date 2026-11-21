@@ -69,6 +69,7 @@ code { font-size: 0.88em; background: var(--surface); border: 1px solid var(--li
 .btn-dark { background: var(--bus-ink); color: #FFFFFF; }
 .btn-line { border-color: var(--bus-ink); color: var(--bus-ink); }
 .hero .note { margin-top: 14px; font-size: 0.9rem; }
+.hero .warn { margin-top: 16px; background: #FFF4D6; color: #12222D; border: 2px solid #12222D; border-radius: 14px; padding: 12px 16px; max-width: 62ch; }
 @media (max-width: 560px) { .hero .wrap { grid-template-columns: 1fr; } .hero-icon { width: 72px; height: 72px; } }
 
 /* Indice */
@@ -143,9 +144,10 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
       <h1>Il mio Amicobus</h1>
       <p class="lead">Un'app gratuita per prenotare Amicobus, il bus a chiamata di CTM Cagliari, senza riscrivere ogni volta il modulo.</p>
       <div class="actions">
-        <a class="btn btn-dark" href="../">Apri l'app</a>
-        <a class="btn btn-line" href="#installazione">Come si installa</a>
+        <a class="btn btn-dark" href="#installazione">Come si installa</a>
+        <a class="btn btn-line" href="../">Apri l'app</a>
       </div>
+      <p class="warn" role="note"><strong>⚠️ Prima di usarla, segui tutta la guida.</strong> L'app compila il modulo di CTM solo dopo l'installazione dell'estensione (<strong>Userscripts</strong> su iPhone, <strong>Violentmonkey</strong> su Android) e dello script, ai passi 3. Senza, resta disponibile solo la prenotazione al telefono.</p>
       <p class="note">Non è un servizio ufficiale di CTM S.p.A. Le prenotazioni le riceve e le conferma soltanto CTM.</p>
     </div>
   </div>
@@ -218,7 +220,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
     <article class="step solo-ios" id="passo-1">
       <div class="step-body">
         <div class="step-head"><span class="num">1</span><h3>Aggiungi l'app alla schermata Home</h3></div>
-        <p>Apri <strong>Safari</strong> e vai su <code>apps.iavvocato.cloud/amicobus</code>. Poi:</p>
+        <p>Apri <strong>Safari</strong> e vai su <a href="https://apps.iavvocato.cloud/amicobus/">apps.iavvocato.cloud/amicobus</a>. Poi:</p>
         <ol>
           <li>Tocca il pulsante <strong>≡</strong> a sinistra dell'indirizzo, nella barra in basso.</li>
           <li>Nel menu tocca <strong>Condividi</strong>.</li>
@@ -239,8 +241,8 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
       <div class="step-body">
         <div class="step-head"><span class="num">1</span><h3>Apri l'app in Firefox</h3></div>
         <ol>
-          <li>Installa <strong>Firefox</strong> dal Play Store, se non ce l'hai.</li>
-          <li>In Firefox vai su <code>apps.iavvocato.cloud/amicobus</code>.</li>
+          <li>Installa <strong>Firefox</strong> dal <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox">Play Store</a>, se non ce l'hai.</li>
+          <li>In Firefox vai su <a href="https://apps.iavvocato.cloud/amicobus/">apps.iavvocato.cloud/amicobus</a>.</li>
         </ol>
         <p class="callout">Su Android l'icona sulla schermata Home si aggiunge <strong>alla fine</strong> (passo 3.3): i passi 2 e 3 si fanno nella scheda di Firefox, dove c'è il menu ⋮ che serve per le estensioni.</p>
       </div>
@@ -278,7 +280,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
       <div class="step-body">
         <div class="step-head"><span class="num">3.1</span><h3>Installa Userscripts</h3></div>
         <ol>
-          <li>Dall'<strong>App Store</strong> installa l'app gratuita <strong>Userscripts</strong> (icona bianca con il simbolo <code>&lt;/&gt;</code>).</li>
+          <li>Dall'App Store installa l'app gratuita <a href="https://apps.apple.com/it/app/userscripts/id1463298887"><strong>Userscripts</strong></a> (icona bianca con il simbolo <code>&lt;/&gt;</code>).</li>
           <li>Aprila una volta. Non serve toccare nulla: il pulsante «Change Userscripts Directory» va lasciato com'è.</li>
         </ol>
       </div>
@@ -306,7 +308,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
       <div class="step-body">
         <div class="step-head"><span class="num">3.3</span><h3>Installa lo script</h3></div>
         <ol>
-          <li>In Safari apri <code>apps.iavvocato.cloud/amicobus/amicobus.user.js</code>. Vedrai una pagina di testo con il codice.</li>
+          <li>In Safari apri <a href="https://apps.iavvocato.cloud/amicobus/amicobus.user.js">apps.iavvocato.cloud/amicobus/amicobus.user.js</a>. Vedrai una pagina di testo con il codice.</li>
           <li>Tocca il pulsante <strong>≡</strong> a sinistra dell'indirizzo e, nel menu, <strong>Userscripts</strong>.</li>
           <li>Safari chiede il permesso: tocca <strong>Consenti sempre su questo sito web</strong>. Non scegliere «tutti i siti web».</li>
           <li>Nel riquadro di Userscripts compare la barra gialla <strong>«Userscript Detected: Tap to install»</strong>: toccala.</li>
@@ -343,7 +345,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
         <ol>
           <li>Tocca il menu <strong>⋮</strong> e poi <strong>Estensioni</strong>: si apre l'elenco delle estensioni consigliate.</li>
           <li>Tocca <strong>Scopri altre estensioni</strong>.</li>
-          <li>Nella casella di ricerca in alto scrivi <strong>Violent</strong> e tocca <strong>Violentmonkey</strong>, quello con la scimmietta.</li>
+          <li>Nella casella di ricerca in alto scrivi <strong>Violent</strong> e tocca <strong>Violentmonkey</strong>, quello con la scimmietta. Puoi anche aprire direttamente la <a href="https://addons.mozilla.org/it/android/addon/violentmonkey/">pagina di Violentmonkey</a>.</li>
           <li>Tocca <strong>Aggiungi a Firefox</strong>.</li>
           <li>Firefox elenca i permessi dell'estensione: tocca <strong>Installa</strong>.</li>
           <li>Alla conferma «Violentmonkey è stato installato» tocca <strong>OK</strong>.</li>
@@ -362,7 +364,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
       <div class="step-body">
         <div class="step-head"><span class="num">3.2</span><h3>Installa lo script</h3></div>
         <ol>
-          <li>In Firefox apri <code>apps.iavvocato.cloud/amicobus/amicobus.user.js</code>.</li>
+          <li>In Firefox apri <a href="https://apps.iavvocato.cloud/amicobus/amicobus.user.js">apps.iavvocato.cloud/amicobus/amicobus.user.js</a>.</li>
           <li>Violentmonkey mostra «Installazione dello script – Il mio Amicobus»: tocca <strong>Installa</strong>.</li>
           <li>Accanto ai pulsanti compare <strong>«Script installato»</strong>. Puoi chiudere la scheda.</li>
         </ol>
