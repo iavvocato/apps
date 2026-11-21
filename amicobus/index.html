@@ -441,8 +441,15 @@ function linkGoogleCalendar(p) {
     '&ctz=Europe/Rome' +
     '&details=' + encodeURIComponent(m.testo);
 }
+/* Metodo provato su iPhone (prova "C"): un indirizzo .ics vero, servito da sw.js, aperto nella stessa finestra.
+   Se il service worker non è attivo (primo avvio, browser senza service worker) si usa il metodo di riserva. */
 function hrefIcs(p) {
   const ics = icsPer(p);
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    const bytes = new TextEncoder().encode(ics); let bin = '';
+    bytes.forEach(b => { bin += String.fromCharCode(b); });
+    return { href: 'promemoria.ics?ics=' + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''), download: '' };
+  }
   if (isIOS()) return { href: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics), download: '' };
   try { return { href: URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' })), download: 'amicobus-promemoria.ics' }; }
   catch (e) { return { href: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics), download: 'amicobus-promemoria.ics' }; }
@@ -1022,6 +1029,12 @@ function apriDaIndirizzo() {
 window.addEventListener('hashchange', apriDaIndirizzo);
 
 if (!apriDaIndirizzo()) render();
+
+/* Service worker: serve solo a creare i promemoria .ics (vedi sw.js). Nelle pagine di Claude non è disponibile. */
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (V.view === 'promemoria') render(); });
+}
 /* Il semaforo si aggiorna da solo ogni minuto, solo nella schermata iniziale. */
 setInterval(() => { if (V.view === 'home') render(); }, 60000);
 })();
