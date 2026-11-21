@@ -43,6 +43,7 @@ a { color: var(--accent); }
 .app .go { color: var(--accent); font-weight: 700; }
 .app .go.primary { color: var(--surface); background: var(--accent); }
 .app .links { flex-direction: row; }
+.warn { background: #FFF4D6; color: #12222D; border: 2px solid #12222D; border-radius: 12px; padding: 10px 14px; font-size: 0.95rem; }
 </style>
 </head>
 <body>
@@ -59,6 +60,7 @@ a { color: var(--accent); }
       <h2>Il mio Amicobus</h2>
       <p>Per prenotare il bus Amicobus di CTM Cagliari, il servizio a chiamata per persone con disabilità: viaggi già pronti, orari di prenotazione, telefonata guidata, promemoria nel calendario, annullamento su WhatsApp.</p>
       <p class="muted">Non è un servizio ufficiale CTM.</p>
+      <p class="warn" role="note"><strong>⚠️ Prima di usarla, segui tutta la guida.</strong> L'app compila il modulo di CTM solo dopo i quattro passaggi di installazione, compresa l'estensione del browser (Userscripts su iPhone, Violentmonkey su Android).</p>
       <div class="links">
         <a class="go primary" href="amicobus/guida/">Guida e istruzioni</a>
         <a class="go" href="amicobus/">Apri l'app →</a>
