@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guida · Il mio Amicobus</title>
+<meta name="description" content="Come installare e usare Il mio Amicobus, l'app gratuita per prenotare Amicobus di CTM Cagliari. Non è un servizio ufficiale CTM.">
+<link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@500;700&display=swap">
+<style>
+/* Layout: una colonna di lettura; ogni passo affianca testo e screenshot su schermi larghi, li impila sul telefono. */
+:root {
+  --bg: #EEF3F6;
+  --surface: #FFFFFF;
+  --ink: #12222D;
+  --muted: #4A5E6C;
+  --line: #C9D6DE;
+  --accent: #0B5AA8;
+  --accent-ink: #FFFFFF;
+  --bus: #F2B705;
+  --bus-ink: #12222D;
+  --warn-bg: #FDEFD3;
+  --warn: #8A5300;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-head: "Lexend", "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1920; --surface: #16252F; --ink: #E7EFF4; --muted: #A3B6C3; --line: #2C4250;
+    --accent: #6AAEF2; --accent-ink: #0E1920; --bus: #F5C842; --bus-ink: #12222D; --warn-bg: #3A2A10; --warn: #F2B25C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1920; --surface: #16252F; --ink: #E7EFF4; --muted: #A3B6C3; --line: #2C4250;
+  --accent: #6AAEF2; --accent-ink: #0E1920; --bus: #F5C842; --bus-ink: #12222D; --warn-bg: #3A2A10; --warn: #F2B25C;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 18px; line-height: 1.55;
+}
+.wrap {
+  max-width: 880px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-head); line-height: 1.2; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 6vw, 2.8rem); }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.15rem; }
+p { margin: 0; max-width: 62ch; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 4px solid var(--bus); outline-offset: 2px; border-radius: 6px; }
+code { font-size: 0.88em; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; overflow-wrap: anywhere; }
+.small { font-size: 0.88rem; color: var(--muted); }
+
+/* Testata */
+.hero { background: var(--bus); color: var(--bus-ink); margin-top: calc(-1 * env(safe-area-inset-top, 0px)); padding-top: calc(env(safe-area-inset-top, 0px) + 40px); padding-bottom: 40px; }
+.hero .wrap { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
+.hero-icon { width: 96px; height: 96px; border-radius: 22px; display: block; box-shadow: 0 6px 0 rgba(0,0,0,.15); }
+.hero .lead { font-size: 1.15rem; margin-top: 8px; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 10px 20px; border-radius: 14px; font-weight: 700; text-decoration: none; border: 2px solid transparent; }
+.btn-dark { background: var(--bus-ink); color: #FFFFFF; }
+.btn-line { border-color: var(--bus-ink); color: var(--bus-ink); }
+.hero .note { margin-top: 14px; font-size: 0.9rem; }
+@media (max-width: 560px) { .hero .wrap { grid-template-columns: 1fr; } .hero-icon { width: 72px; height: 72px; } }
+
+/* Indice */
+.toc { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.toc .wrap { display: flex; gap: 8px; overflow-x: auto; padding-block: 10px; }
+.toc a { flex: none; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 0.92rem; font-weight: 700; }
+
+section.block { padding-block: 48px 8px; display: flex; flex-direction: column; gap: 20px; }
+.kicker { font-family: var(--font-head); font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+/* Funzioni */
+.features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.feature { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.feature img { border-radius: 12px; border: 1px solid var(--line); width: 100%; height: 260px; object-fit: cover; object-position: top; }
+@media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
+
+.checklist { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.checklist li { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; display: grid; grid-template-columns: 28px 1fr; gap: 10px; }
+
+/* Passi */
+.step { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
+.step.no-shot { grid-template-columns: 1fr; }
+.step-head { display: flex; gap: 14px; align-items: baseline; }
+.num { font-family: var(--font-head); font-weight: 700; font-size: 1rem; background: var(--accent); color: var(--accent-ink); border-radius: 999px; min-width: 36px; height: 36px; display: inline-grid; place-items: center; flex: none; }
+.step-body { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.step ol, .step ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+.shots { display: flex; flex-direction: column; gap: 14px; }
+.phone { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.phone img { width: 100%; max-width: 260px; border-radius: 22px; border: 6px solid #1B2730; background: #1B2730; }
+.phone figcaption { font-size: 0.85rem; color: var(--muted); }
+.todo { width: 100%; max-width: 260px; aspect-ratio: 9 / 16; border: 3px dashed var(--warn); border-radius: 22px; background: var(--warn-bg); color: var(--warn); display: grid; place-items: center; text-align: center; padding: 16px; font-weight: 700; font-size: 0.95rem; }
+@media (max-width: 700px) {
+  .step { grid-template-columns: 1fr; }
+  .shots { flex-direction: row; overflow-x: auto; padding-bottom: 6px; }
+  .phone { flex: 0 0 220px; }
+  .todo { flex: 0 0 220px; }
+}
+.callout { background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 14px; padding: 12px 16px; }
+
+/* Schede iPhone / Android */
+.tabs { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px; gap: 4px; align-self: flex-start; }
+.tabs button { font: inherit; font-weight: 700; border: 0; background: transparent; color: var(--ink); padding: 8px 18px; border-radius: 999px; cursor: pointer; min-height: 44px; }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.os-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; background: var(--surface); border: 2px solid var(--accent); border-radius: 18px; padding: 14px 18px; }
+:root:not([data-os="android"]) .solo-android { display: none; }
+:root[data-os="android"] .solo-ios { display: none; }
+/* Passi con più screenshot in sequenza: tutti sotto il testo, in fila. */
+.step:has(.shots-row) { grid-template-columns: 1fr; }
+.shots-row { flex-direction: row; overflow-x: auto; padding-bottom: 6px; }
+.shots-row .phone, .shots-row .todo { flex: 0 0 200px; }
+.shots-row .phone img { max-width: 200px; }
+
+/* Problemi */
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+details summary { cursor: pointer; font-weight: 700; }
+details[open] summary { margin-bottom: 8px; }
+details p + p { margin-top: 8px; }
+.video { border: 3px dashed var(--line); border-radius: 18px; aspect-ratio: 16 / 9; max-width: 100%; display: grid; place-items: center; text-align: center; color: var(--muted); padding: 16px; background: var(--surface); }
+
+footer { margin-top: 56px; border-top: 1px solid var(--line); padding-block: 24px 40px; }
+footer .wrap { display: flex; flex-direction: column; gap: 8px; }
+.mock-flag { background: var(--warn-bg); color: var(--warn); font-size: 0.85rem; font-weight: 700; }
+.mock-flag .wrap { padding-block: 8px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <img class="hero-icon" src="img/icona.png" alt="">
+    <div>
+      <h1>Il mio Amicobus</h1>
+      <p class="lead">Un'app gratuita per prenotare Amicobus, il bus a chiamata di CTM Cagliari, senza riscrivere ogni volta il modulo.</p>
+      <div class="actions">
+        <a class="btn btn-dark" href="../">Apri l'app</a>
+        <a class="btn btn-line" href="#installazione">Come si installa</a>
+      </div>
+      <p class="note">Non è un servizio ufficiale di CTM S.p.A. Le prenotazioni le riceve e le conferma soltanto CTM.</p>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Indice">
+  <div class="wrap">
+    <a href="#cosa-fa">Cosa fa</a>
+    <a href="#prima">Prima di iniziare</a>
+    <a href="#installazione">Installazione</a>
+    <a href="#uso">Uso di tutti i giorni</a>
+    <a href="#problemi">Se qualcosa non va</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section class="block" id="cosa-fa">
+    <span class="kicker">Cosa fa</span>
+    <h2>Chi aiuta prepara tutto una volta, chi viaggia prenota con pochi tocchi</h2>
+    <p>Prenotare Amicobus chiede di compilare ogni volta un modulo con tredici campi, rispettando orari precisi: il giorno prima dalle 8 alle 13, il venerdì per il fine settimana e per il lunedì. L'app ricorda dati, luoghi e viaggi abituali e dice quando si può prenotare.</p>
+    <div class="features">
+      <div class="feature">
+        <img src="img/app-home.jpg" alt="Schermata iniziale con il semaforo verde e i viaggi prenotati">
+        <h3>Il semaforo</h3>
+        <p>Verde quando si può prenotare, rosso quando no, con il giorno e l'ora della prossima apertura.</p>
+      </div>
+      <div class="feature">
+        <img src="img/app-scegli.jpg" alt="Scelta del viaggio con le icone dei luoghi">
+        <h3>I viaggi già pronti</h3>
+        <p>Si tocca il viaggio, si sceglie il giorno, si controlla il riepilogo. Il modulo di CTM arriva già compilato.</p>
+      </div>
+      <div class="feature">
+        <img src="img/app-telefono.jpg" alt="Telefonata guidata con il numero verde e il copione">
+        <h3>La telefonata guidata</h3>
+        <p>Il numero verde, l'orario del call center e un copione da leggere all'operatore.</p>
+      </div>
+      <div class="feature">
+        <img src="img/app-bozza.jpg" alt="Viaggio salvato come bozza da mandare più tardi">
+        <h3>Prepara per dopo</h3>
+        <p>Fuori orario il viaggio si salva come bozza, con un promemoria nel calendario per quando si potrà mandare.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="prima">
+    <span class="kicker">Prima di iniziare</span>
+    <h2>Cosa serve</h2>
+    <ul class="checklist">
+      <li><span aria-hidden="true">📱</span><span>Un <strong>iPhone con iOS 17 o successivo</strong> (Safari), oppure un <strong>telefono Android con Firefox</strong>.</span></li>
+      <li><span aria-hidden="true">🧾</span><span>I dati della persona che viaggia: nome, cognome, telefono, email, gli indirizzi dei luoghi abituali e gli orari.</span></li>
+      <li><span aria-hidden="true">⏱️</span><span>Circa <strong>15 minuti</strong>, una volta sola. Di solito lo fa chi aiuta: un familiare o un operatore.</span></li>
+      <li><span aria-hidden="true">🔒</span><span>Nessun account. I dati restano sul telefono e arrivano a CTM solo quando si prenota.</span></li>
+    </ul>
+  </section>
+
+  <section class="block" id="installazione">
+    <span class="kicker">Installazione</span>
+    <h2>Quattro passi</h2>
+    <div class="os-pick">
+      <p><strong>Che telefono usi?</strong> Le istruzioni cambiano in base alla scelta.</p>
+      <div class="tabs" role="tablist" aria-label="Tipo di telefono">
+        <button role="tab" id="tab-ios" aria-selected="true">iPhone</button>
+        <button role="tab" id="tab-android" aria-selected="false">Android</button>
+      </div>
+    </div>
+    <p class="small">Negli screenshot il punto da toccare è <strong>contornato in giallo</strong>, con il numero del passo.</p>
+
+    <!-- Passo 1 -->
+    <article class="step solo-ios" id="passo-1">
+      <div class="step-body">
+        <div class="step-head"><span class="num">1</span><h3>Aggiungi l'app alla schermata Home</h3></div>
+        <p>Apri <strong>Safari</strong> e vai su <code>apps.iavvocato.cloud/amicobus</code>. Poi:</p>
+        <ol>
+          <li>Tocca il pulsante <strong>≡</strong> a sinistra dell'indirizzo, nella barra in basso.</li>
+          <li>Nel menu tocca <strong>Condividi</strong>.</li>
+          <li>Tocca <strong>Visualizza altro</strong>.</li>
+          <li>Tocca <strong>Aggiungi alla schermata Home</strong>, poi <strong>Aggiungi</strong>.</li>
+        </ol>
+        <p class="small">Sulla Home compare l'icona gialla con il bus. Da lì l'app si apre a tutto schermo, come le altre.</p>
+      </div>
+      <div class="shots shots-row">
+        <figure class="phone"><img src="img/ios-1-menu.jpg" alt="Safari: il pulsante ≡ a sinistra dell'indirizzo, evidenziato"><figcaption>1 · Il pulsante ≡</figcaption></figure>
+        <figure class="phone"><img src="img/ios-2-condividi.jpg" alt="Menu di Safari con la voce Condividi evidenziata"><figcaption>2 · Condividi</figcaption></figure>
+        <figure class="phone"><img src="img/ios-3-visualizza-altro.jpg" alt="Foglio di condivisione con Visualizza altro evidenziato"><figcaption>3 · Visualizza altro</figcaption></figure>
+        <figure class="phone"><img src="img/ios-4-aggiungi-home.jpg" alt="Voce Aggiungi alla schermata Home evidenziata"><figcaption>4 · Aggiungi alla schermata Home</figcaption></figure>
+      </div>
+    </article>
+
+    <article class="step solo-android">
+      <div class="step-body">
+        <div class="step-head"><span class="num">1</span><h3>Aggiungi l'app alla schermata Home</h3></div>
+        <p>Installa <strong>Firefox</strong> dal Play Store, se non ce l'hai, e vai su <code>apps.iavvocato.cloud/amicobus</code>. Poi:</p>
+        <ol>
+          <li>Tocca il menu <strong>⋮</strong> in alto a destra.</li>
+          <li>Tocca <strong>Altro</strong> per vedere tutte le voci.</li>
+          <li>Tocca <strong>Aggiungi app alla schermata principale</strong>.</li>
+          <li>Tocca <strong>Aggiungi alla schermata Home</strong>. In alternativa, tieni premuto il riquadro con l'icona e trascinalo dove vuoi.</li>
+        </ol>
+        <p class="small">Usa sempre Firefox: è il browser in cui funziona la compilazione automatica del passo 3. Su alcuni telefoni, per esempio i Nothing Phone, il sistema mostra l'icona con lo stile del telefono invece di quella dell'app.</p>
+      </div>
+      <div class="shots shots-row">
+        <figure class="phone"><img src="img/and-1-menu.jpg" alt="Firefox: il menu ⋮ evidenziato"><figcaption>1 · Il menu ⋮</figcaption></figure>
+        <figure class="phone"><img src="img/and-2-altro.jpg" alt="Menu di Firefox con la voce Altro evidenziata"><figcaption>2 · Altro</figcaption></figure>
+        <figure class="phone"><img src="img/and-3-aggiungi-app.jpg" alt="Voce Aggiungi app alla schermata principale evidenziata"><figcaption>3 · Aggiungi app alla schermata principale</figcaption></figure>
+        <figure class="phone"><img src="img/and-4-aggiungi-home.jpg" alt="Finestra per aggiungere l'icona con il pulsante Aggiungi alla schermata Home evidenziato"><figcaption>4 · Aggiungi alla schermata Home</figcaption></figure>
+      </div>
+    </article>
+
+    <!-- Passo 2 -->
+    <article class="step" id="passo-2">
+      <div class="step-body">
+        <div class="step-head"><span class="num">2</span><h3>Inserisci i dati</h3></div>
+        <ol>
+          <li>Apri l'app e tocca <strong>⚙️ Impostazioni</strong>. Il PIN iniziale è <strong>1234</strong>.</li>
+          <li>Tocca <strong>Cancella l'esempio e parti da zero</strong>.</li>
+          <li>In <strong>Persona che viaggia</strong> scrivi nome, cognome, telefono ed email, chi l'accompagna e il tipo di posto a sedere. Scrivi anche la scadenza dell'iscrizione ad Amicobus: l'app avvisa quando va rinnovata.</li>
+          <li>In <strong>Luoghi</strong> aggiungi casa e i posti abituali, con un simbolo, l'indirizzo e il comune.</li>
+          <li>In <strong>Viaggi pronti</strong> crea i tragitti ricorrenti, con l'ora di partenza e, se serve, quella del ritorno.</li>
+          <li>In <strong>Altro</strong> cambia il PIN con uno tuo.</li>
+        </ol>
+        <p class="callout">In <strong>Copia di sicurezza</strong> c'è un codice con tutti i dati: copialo e conservalo, per esempio in una mail a te stesso. Serve se si cancella l'app o se si cambia telefono.</p>
+      </div>
+      <div class="shots">
+        <figure class="phone"><img src="img/app-pin.jpg" alt="Tastierino per il PIN delle impostazioni"><figcaption>Il PIN protegge le impostazioni.</figcaption></figure>
+        <figure class="phone"><img src="img/app-impostazioni.jpg" alt="Impostazioni con i dati della persona che viaggia"><figcaption>I dati della persona.</figcaption></figure>
+      </div>
+    </article>
+
+    <!-- Passo 3 -->
+    <article class="step no-shot" id="passo-3">
+      <div class="step-body">
+        <div class="step-head"><span class="num">3</span><h3>Attiva la compilazione automatica del modulo</h3></div>
+        <p>Serve un'estensione gratuita del browser che, quando l'app apre la pagina di CTM, scrive i dati nel modulo. Non invia nulla da sola: la casella «Non sono un robot» e il tasto Prenota restano alla persona. È il passo più lungo, ma si fa una volta sola.</p>
+      </div>
+    </article>
+
+    <article class="step solo-ios">
+      <div class="step-body">
+        <div class="step-head"><span class="num">3.1</span><h3>Installa Userscripts</h3></div>
+        <ol>
+          <li>Dall'<strong>App Store</strong> installa l'app gratuita <strong>Userscripts</strong> (icona bianca con il simbolo <code>&lt;/&gt;</code>).</li>
+          <li>Aprila una volta. Non serve toccare nulla: il pulsante «Change Userscripts Directory» va lasciato com'è.</li>
+        </ol>
+      </div>
+      <div class="shots">
+        <figure class="phone"><img src="img/ios-appstore-userscripts.jpg" alt="Pagina di Userscripts nell'App Store"><figcaption>Tocca «Ottieni». Se è già installata, il pulsante dice «Apri».</figcaption></figure>
+        <figure class="phone"><img src="img/ios-app-userscripts.jpg" alt="Schermata dell'app Userscripts"><figcaption>Basta aprirla una volta.</figcaption></figure>
+      </div>
+    </article>
+
+    <article class="step solo-ios">
+      <div class="step-body">
+        <div class="step-head"><span class="num">3.2</span><h3>Attiva l'estensione in Safari</h3></div>
+        <ol>
+          <li>Apri <strong>Impostazioni</strong> del telefono → <strong>App</strong> → <strong>Safari</strong> → <strong>Estensioni</strong> → <strong>Userscripts</strong>.</li>
+          <li>Attiva <strong>Consenti estensione</strong>.</li>
+          <li>Più in basso, lascia «Altri siti web» su <strong>Chiedi</strong>: i due siti che servono li autorizzi nei passi seguenti.</li>
+        </ol>
+      </div>
+      <div class="shots">
+        <figure class="phone"><img src="img/ios-impostazioni-userscripts.jpg" alt="Impostazioni di Safari con Userscripts attivato"><figcaption>«Consenti estensione» attivo.</figcaption></figure>
+      </div>
+    </article>
+
+    <article class="step solo-ios">
+      <div class="step-body">
+        <div class="step-head"><span class="num">3.3</span><h3>Installa lo script</h3></div>
+        <ol>
+          <li>In Safari apri <code>apps.iavvocato.cloud/amicobus/amicobus.user.js</code>. Vedrai una pagina di testo con il codice.</li>
+          <li>Tocca il pulsante <strong>≡</strong> a sinistra dell'indirizzo e, nel menu, <strong>Userscripts</strong>.</li>
+          <li>Safari chiede il permesso: tocca <strong>Consenti sempre su questo sito web</strong>. Non scegliere «tutti i siti web».</li>
+          <li>Nel riquadro di Userscripts compare la barra gialla <strong>«Userscript Detected: Tap to install»</strong>: toccala.</li>
+          <li>Nella schermata «Install Userscript» tocca <strong>Install</strong>.</li>
+          <li>La barra diventa verde, <strong>«Userscript Installed»</strong>: lo script è installato. Tocca <strong>Fine</strong>.</li>
+        </ol>
+      </div>
+      <div class="shots shots-row">
+        <figure class="phone"><img src="img/ios-menu-userscripts.jpg" alt="Menu di Safari con la voce Userscripts evidenziata"><figcaption>2 · Userscripts nel menu ≡</figcaption></figure>
+        <figure class="phone"><img src="img/ios-consenti-sito.jpg" alt="Richiesta di Safari per consentire Userscripts"><figcaption>3 · «Consenti sempre su questo sito web»</figcaption></figure>
+        <figure class="phone"><img src="img/ios-us-rilevato.jpg" alt="Userscripts: barra gialla Userscript Detected evidenziata"><figcaption>4 · «Tap to install»</figcaption></figure>
+        <figure class="phone"><img src="img/ios-us-install.jpg" alt="Schermata Install Userscript con il pulsante Install evidenziato"><figcaption>5 · Install</figcaption></figure>
+        <figure class="phone"><img src="img/ios-us-installato.jpg" alt="Userscripts: barra verde Userscript Installed evidenziata"><figcaption>6 · Installato</figcaption></figure>
+      </div>
+    </article>
+
+    <article class="step solo-ios">
+      <div class="step-body">
+        <div class="step-head"><span class="num">3.4</span><h3>Autorizza il sito di CTM</h3></div>
+        <ol>
+          <li>In Safari apri la <a href="https://www.ctmcagliari.it/prenotazione-servizio/">pagina di prenotazione Amicobus</a> di CTM.</li>
+          <li>Tocca di nuovo <strong>≡</strong> → <strong>Userscripts</strong> → <strong>Consenti sempre su questo sito web</strong>.</li>
+          <li>Nel riquadro di Userscripts ora compare <strong>«Il mio Amicobus – compila il modulo CTM»</strong>. Il modulo dietro resta vuoto: si riempie solo quando lo apre l'app.</li>
+        </ol>
+      </div>
+      <div class="shots">
+        <figure class="phone"><img src="img/ios-userscripts-su-ctm.jpg" alt="Riquadro di Userscripts sulla pagina di CTM con lo script installato"><figcaption>Lo script è pronto sulla pagina di CTM.</figcaption></figure>
+      </div>
+    </article>
+
+    <article class="step solo-android">
+      <div class="step-body">
+        <div class="step-head"><span class="num">3.1</span><h3>Installa Violentmonkey in Firefox</h3></div>
+        <ol>
+          <li>Tocca il menu <strong>⋮</strong> e poi <strong>Estensioni</strong>: si apre l'elenco delle estensioni consigliate.</li>
+          <li>Tocca <strong>Scopri altre estensioni</strong>.</li>
+          <li>Nella casella di ricerca in alto scrivi <strong>Violent</strong> e tocca <strong>Violentmonkey</strong>, quello con la scimmietta.</li>
+          <li>Tocca <strong>Aggiungi a Firefox</strong>.</li>
+          <li>Firefox elenca i permessi dell'estensione: tocca <strong>Installa</strong>.</li>
+          <li>Alla conferma «Violentmonkey è stato installato» tocca <strong>OK</strong>.</li>
+        </ol>
+      </div>
+      <div class="shots shots-row">
+        <figure class="phone"><img src="img/and-estensioni.jpg" alt="Menu Estensioni di Firefox con Scopri altre estensioni evidenziato"><figcaption>2 · Scopri altre estensioni</figcaption></figure>
+        <figure class="phone"><img src="img/and-vm-cerca.jpg" alt="Ricerca di Violentmonkey con il risultato evidenziato"><figcaption>3 · Cerca e tocca Violentmonkey</figcaption></figure>
+        <figure class="phone"><img src="img/and-vm-aggiungi.jpg" alt="Pagina di Violentmonkey con Aggiungi a Firefox evidenziato"><figcaption>4 · Aggiungi a Firefox</figcaption></figure>
+        <figure class="phone"><img src="img/and-vm-installa.jpg" alt="Permessi di Violentmonkey con Installa evidenziato"><figcaption>5 · Installa</figcaption></figure>
+        <figure class="phone"><img src="img/and-vm-ok.jpg" alt="Conferma di installazione con OK evidenziato"><figcaption>6 · OK</figcaption></figure>
+      </div>
+    </article>
+
+    <article class="step solo-android">
+      <div class="step-body">
+        <div class="step-head"><span class="num">3.2</span><h3>Installa lo script</h3></div>
+        <ol>
+          <li>In Firefox apri <code>apps.iavvocato.cloud/amicobus/amicobus.user.js</code>.</li>
+          <li>Violentmonkey mostra «Installazione dello script – Il mio Amicobus»: tocca <strong>Installa</strong>.</li>
+          <li>Accanto ai pulsanti compare <strong>«Script installato»</strong>. Puoi chiudere la scheda.</li>
+        </ol>
+      </div>
+      <div class="shots shots-row">
+        <figure class="phone"><img src="img/and-script-installa.jpg" alt="Violentmonkey: installazione dello script con il pulsante Installa evidenziato"><figcaption>2 · Installa</figcaption></figure>
+        <figure class="phone"><img src="img/and-script-ok.jpg" alt="Violentmonkey: messaggio Script installato evidenziato"><figcaption>3 · Script installato</figcaption></figure>
+      </div>
+    </article>
+
+    <!-- Passo 4 -->
+    <article class="step" id="passo-4">
+      <div class="step-body">
+        <div class="step-head"><span class="num">4</span><h3>Fai una prova</h3></div>
+        <ol>
+          <li>In ⚙️ Impostazioni → <strong>Altro</strong> attiva la <strong>modalità prova</strong>, che ignora gli orari di prenotazione.</li>
+          <li>Tocca <strong>Prenota un viaggio</strong>, scegli un viaggio e un giorno, poi <strong>Prenota sul sito CTM</strong>.</li>
+          <li>Si apre <span class="solo-ios">Safari</span><span class="solo-android">Firefox</span> con il modulo compilato e, in basso, il riquadro <strong>«Ho scritto io tutti i dati»</strong>. Controlla data, indirizzi e orari.</li>
+          <li><strong>Non premere Prenota</strong>: partirebbe una richiesta vera a CTM.</li>
+          <li>Torna nell'app e disattiva la modalità prova.</li>
+        </ol>
+      </div>
+      <div class="shots shots-row">
+        <figure class="phone"><img src="img/prova-modulo.jpg" alt="Modulo CTM compilato con i dati di esempio e il riquadro Ho scritto io tutti i dati"><figcaption>Il modulo compilato, con il riquadro in basso.</figcaption></figure>
+        <figure class="phone"><img src="img/prova-captcha.jpg" alt="Fondo del modulo CTM con la casella Non sono un robot e il tasto Prenota evidenziati"><figcaption>In giallo la casella e il tasto da toccare (nella prova, non toccarli).</figcaption></figure>
+      </div>
+    </article>
+  </section>
+
+  <section class="block" id="uso">
+    <span class="kicker">Uso di tutti i giorni</span>
+    <h2>Dalla prenotazione alla conferma</h2>
+
+    <article class="step">
+      <div class="step-body">
+        <div class="step-head"><span class="num">1</span><h3>Prenota quando il semaforo è verde</h3></div>
+        <p>Si sceglie il viaggio e il giorno, si controlla il riepilogo (anche ad alta voce con 🔊), poi si prenota sul sito o al telefono. Sul sito restano da fare due tocchi: la casella «Non sono un robot» e il tasto Prenota.</p>
+      </div>
+      <div class="shots"><figure class="phone"><img src="img/app-riepilogo.jpg" alt="Riepilogo del viaggio prima dell'invio"><figcaption>Il riepilogo prima dell'invio.</figcaption></figure></div>
+    </article>
+
+    <article class="step">
+      <div class="step-body">
+        <div class="step-head"><span class="num">2</span><h3>Aspetta la telefonata delle 17:30</h3></div>
+        <p>La prenotazione vale solo dopo la telefonata di conferma di CTM, dalle 17:30. Quando arriva, in «I miei viaggi» si tocca <strong>Mi hanno chiamato: è confermato</strong> e si segnano gli orari di passaggio del bus.</p>
+      </div>
+      <div class="shots"><figure class="phone"><img src="img/app-home.jpg" alt="Elenco dei viaggi con lo stato di ciascuno"><figcaption>Ogni viaggio con il suo stato.</figcaption></figure></div>
+    </article>
+
+    <article class="step">
+      <div class="step-body">
+        <div class="step-head"><span class="num">3</span><h3>Fuori orario: prepara e ricordatelo</h3></div>
+        <p>Se il semaforo è rosso, il pulsante diventa <strong>Prepara un viaggio per dopo</strong>. Il viaggio si salva come bozza e l'app aggiunge un promemoria al calendario, con un avviso all'apertura e uno un'ora prima della chiusura. Dal promemoria si torna nell'app con il viaggio pronto da mandare.</p>
+      </div>
+      <div class="shots"><figure class="phone"><img src="img/app-promemoria.jpg" alt="Schermata per aggiungere il promemoria al calendario"><figcaption>Il promemoria nel calendario.</figcaption></figure></div>
+    </article>
+
+    <article class="step no-shot">
+      <div class="step-body">
+        <div class="step-head"><span class="num">4</span><h3>Se non vai più</h3></div>
+        <p>Su un viaggio confermato tocca <strong>Non vado più</strong>: si apre WhatsApp con il messaggio di cancellazione già scritto per il numero di CTM 348 250 2731, almeno mezz'ora prima. Se manca meno di mezz'ora, l'app dice di chiamare il numero verde 800 259 745.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="block" id="problemi">
+    <span class="kicker">Se qualcosa non va</span>
+    <h2>Problemi frequenti</h2>
+    <details>
+      <summary>La pagina di CTM si apre ma il modulo è vuoto</summary>
+      <p>Guarda in alto: se c'è una <strong>X</strong> al posto della barra degli indirizzi, la pagina si è aperta in una finestra interna in cui le estensioni non funzionano. Su iPhone serve iOS 17 o successivo; in alternativa apri l'app da Safari invece che dall'icona sulla Home.</p>
+      <p>Se la pagina è in Safari, controlla i passi 3.3 e 3.4: lo script deve essere installato e il sito di CTM autorizzato.</p>
+    </details>
+    <details>
+      <summary>Il modulo è compilato ma non vedo andata e ritorno</summary>
+      <p>Lo script è di una versione vecchia. Ripeti il passo 3.3 (su iPhone la barra verde dice «Tap to re-install»: toccala), oppure il 3.2 su Android: la nuova versione sostituisce quella installata. In cima al testo dello script deve esserci <code>@version 0.2.0</code> o successiva.</p>
+    </details>
+    <details>
+      <summary>Nel riquadro di Userscripts non compare la barra gialla «Tap to install»</summary>
+      <p>Installa lo script a mano. Nell'app tocca ⚙️ Impostazioni → Compilazione automatica → <strong>Copia lo script</strong>. Poi in Safari tocca ≡ → Userscripts e, nel riquadro, tocca <strong>+</strong> → <strong>New JS</strong>, cancella il testo di esempio, incolla e tocca <strong>Save</strong>.</p>
+    </details>
+    <details>
+      <summary>La casella «Non sono un robot» chiede di scegliere delle immagini</summary>
+      <p>Succede ogni tanto. Se è difficile, usa la telefonata guidata: nel riepilogo tocca <strong>Prenota al telefono</strong>.</p>
+    </details>
+    <details>
+      <summary>Come aggiorno l'app?</summary>
+      <p>Su iPhone, a volte l'app sulla Home resta alla versione vecchia finché non si cancella l'icona e la si aggiunge di nuovo. Cancellare l'icona <strong>cancella anche i dati</strong>: prima copia il codice in ⚙️ Impostazioni → Copia di sicurezza, poi incollalo nella nuova installazione.</p>
+    </details>
+  </section>
+
+  <section class="block" id="video">
+    <span class="kicker">Video</span>
+    <h2>La guida in video</h2>
+    <div class="video">Video guida in preparazione</div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap small">
+    <p><strong>Il mio Amicobus non è un servizio ufficiale di CTM S.p.A.</strong> Le informazioni sul servizio vengono dal sito ctmcagliari.it (novembre 2026); in caso di differenze valgono le indicazioni di CTM.</p>
+    <p>L'app non usa account, cookie o statistiche: i dati restano sul telefono di chi la usa.</p>
+    <p>Realizzata da <a href="https://iavvocato.cloud">iAvvocato</a> · <a href="https://apps.iavvocato.cloud">altre app</a> · <a href="https://github.com/iavvocato/apps">codice aperto (MIT)</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // La scelta iPhone / Android vale per tutta la pagina: mostra solo i blocchi .solo-ios o .solo-android.
+  var tabs = document.querySelectorAll('[role=tab]');
+  function scegli(os) {
+    document.documentElement.setAttribute('data-os', os);
+    tabs.forEach(function (t) { t.setAttribute('aria-selected', t.id === 'tab-' + os ? 'true' : 'false'); });
+  }
+  tabs.forEach(function (t) { t.addEventListener('click', function () { scegli(t.id.replace('tab-', '')); }); });
+  scegli(/Android/i.test(navigator.userAgent) ? 'android' : 'ios');
+})();
+</script>
+</body>
+</html>

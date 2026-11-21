@@ -759,6 +759,7 @@ const VIEWS = {
 
   info() {
     return header('Come funziona Amicobus', true) +
+      '<a class="btn yellow" href="guida/" target="_blank" rel="noopener">📖 Guida completa, con le immagini</a>' +
       '<section class="card"><dl class="facts">' +
       '<dt>Quando viaggia</dt><dd>Tutti i giorni, dalle 7:00 alle 20:00</dd>' +
       '<dt>Dove</dt><dd>' + esc(COMUNI.join(', ')) + '</dd>' +
@@ -829,6 +830,7 @@ const VIEWS = {
 
       '<details class="card"><summary>Compilazione automatica del sito</summary>' +
       '<p>Per riempire il modulo di CTM da solo serve un piccolo script nel browser del telefono. Si installa una volta.</p>' +
+      '<a class="btn yellow" href="guida/#passo-3" target="_blank" rel="noopener">📖 Istruzioni passo per passo, con le immagini</a>' +
       '<h3>iPhone e iPad (Safari)</h3><ol class="list-plain">' +
       '<li>Installa l\'app gratuita <strong>Userscripts</strong> dall\'App Store e aprila una volta. Non serve cambiare la cartella.</li>' +
       '<li>In <strong>Impostazioni → Safari → Estensioni → Userscripts</strong> attiva “Consenti estensione”.</li>' +
