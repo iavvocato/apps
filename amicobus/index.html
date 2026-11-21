@@ -317,7 +317,7 @@ function dettagli(p) {
     oraA = 'Partita ore ' + (v.oraPartita || '15:00');
     oraR = 'Fine partita';
   }
-  return { v, da, a, oraA, oraR, testoA, testoR, tratte: v.ritorno ? 2 : 1 };
+  return { v, da, a, oraA, oraR, testoA, testoR, tratte: (v.ritorno ? 2 : 1) - (p.andataAnnullata ? 1 : 0) };
 }
 function richiestaDa(viaggioObj, dataIso, oraPartita) {
   return {
@@ -371,12 +371,22 @@ function copione(p) {
   righe.push('Il mio numero di telefono è ' + pr.telefono + '.');
   return righe;
 }
-function messaggioCancellazione(p) {
+function messaggioCancellazione(p, cosa) {
   const d = dettagli(p);
+  const andata = 'andata da ' + d.da.indirizzo + ', ' + d.da.citta + ' a ' + d.a.indirizzo + ', ' + d.a.citta + (p.passaggioAndata ? ' (passaggio alle ' + p.passaggioAndata + ')' : '');
+  const ritorno = 'ritorno da ' + d.a.indirizzo + ', ' + d.a.citta + ' a ' + d.da.indirizzo + ', ' + d.da.citta + (p.passaggioRitorno ? ' (passaggio alle ' + p.passaggioRitorno + ')' : '');
   let t = 'Buongiorno, sono ' + nomeCompleto() + ', telefono ' + S.profilo.telefono + '.\n';
-  t += 'Annullo la corsa Amicobus confermata di ' + dataLunga(fromIso(p.data)) + ':\n';
-  t += '- andata da ' + d.da.indirizzo + ', ' + d.da.citta + ' a ' + d.a.indirizzo + ', ' + d.a.citta + (p.passaggioAndata ? ' (passaggio alle ' + p.passaggioAndata + ')' : '') + '\n';
-  if (d.v.ritorno) t += '- ritorno da ' + d.a.indirizzo + ', ' + d.a.citta + ' a ' + d.da.indirizzo + ', ' + d.da.citta + (p.passaggioRitorno ? ' (passaggio alle ' + p.passaggioRitorno + ')' : '') + '\n';
+  if (cosa === 'andata') {
+    t += 'Per la corsa Amicobus confermata di ' + dataLunga(fromIso(p.data)) + ' annullo solo l\'' + andata + '.\n';
+    t += 'Il ritorno resta confermato.\n';
+  } else if (cosa === 'ritorno') {
+    t += 'Per la corsa Amicobus confermata di ' + dataLunga(fromIso(p.data)) + ' annullo solo il ' + ritorno + '.\n';
+    t += "L'andata resta confermata.\n";
+  } else {
+    t += 'Annullo la corsa Amicobus confermata di ' + dataLunga(fromIso(p.data)) + ':\n';
+    t += '- ' + andata + '\n';
+    if (d.v.ritorno) t += '- ' + ritorno + '\n';
+  }
   t += 'Grazie.';
   return t;
 }
@@ -552,8 +562,8 @@ function cardPrenotazione(p, now) {
       '<button data-a="rifiuta" data-id="' + p.id + '">✖ Mi hanno detto di no</button></div>' +
       '<button class="quiet danger" data-a="annulla" data-id="' + p.id + '">Non vado più</button>';
   } else if (p.stato === 'confermata') {
-    corpo = '<dl class="facts"><dt>Il bus passa</dt><dd>alle ' + esc(p.passaggioAndata || '?') + ' da ' + esc(d.da.nome) + '</dd>' +
-      (d.v.ritorno ? '<dt>Ritorno</dt><dd>alle ' + esc(p.passaggioRitorno || '?') + ' da ' + esc(d.a.nome) + '</dd>' : '') +
+    corpo = '<dl class="facts">' + (p.andataAnnullata ? '<dt>Andata</dt><dd>annullata</dd>' : '<dt>Il bus passa</dt><dd>alle ' + esc(p.passaggioAndata || '?') + ' da ' + esc(d.da.nome) + '</dd>') +
+      (d.v.ritorno ? '<dt>Ritorno</dt><dd>alle ' + esc(p.passaggioRitorno || '?') + ' da ' + esc(d.a.nome) + '</dd>' : (p.ritornoAnnullato ? '<dt>Ritorno</dt><dd>annullato</dd>' : '')) +
       '<dt>Costo</dt><dd>' + euro(TARIFFA * d.tratte) + '</dd></dl>' +
       '<div class="row"><button data-a="conferma" data-id="' + p.id + '">Cambia gli orari</button><button class="danger" data-a="annulla" data-id="' + p.id + '">❌ Non vado più</button></div>';
   } else {
@@ -722,23 +732,40 @@ const VIEWS = {
         '<button class="danger" data-a="segna-annullata" data-id="' + p.id + '">Segna come annullato</button>';
     }
     const data = fromIso(p.data);
-    const primo = p.passaggioAndata ? toMin(p.passaggioAndata) : null;
-    const tardi = sameDay(data, now) && primo != null && primo - minOf(now) < 30;
-    const msg = messaggioCancellazione(p);
-    if (tardi) {
+    // Se oggi il passaggio dell'andata è già avvenuto, resta da annullare solo il ritorno.
+    const andataPassata = sameDay(data, now) && p.passaggioAndata && minOf(now) >= toMin(p.passaggioAndata);
+    let cosa = V.cosa || (andataPassata ? 'ritorno' : null);
+    if (!p.ritorno) cosa = 'tutto';
+    if (p.andataAnnullata) cosa = 'ritorno';
+    if (!cosa) {
       return header('Non vado più', true) +
+        '<section class="card"><h2>Cosa vuoi annullare?</h2>' +
+        '<p>' + esc(p.nome) + ' · ' + esc(dataLunga(fromIso(p.data))) + '</p></section>' +
+        '<button class="primary" data-a="annulla-cosa" data-c="tutto">❌ Tutto: andata e ritorno</button>' +
+        '<button class="yellow" data-a="annulla-cosa" data-c="andata">➡️ Solo l\'andata' + (p.passaggioAndata ? ' delle ' + esc(p.passaggioAndata) : '') + '</button>' +
+        '<button class="yellow" data-a="annulla-cosa" data-c="ritorno">↩️ Solo il ritorno' + (p.passaggioRitorno ? ' delle ' + esc(p.passaggioRitorno) : '') + '</button>' +
+        '<p class="small">Se annulli solo una delle due corse, l\'altra resta confermata.</p>';
+    }
+    const ora = cosa === 'ritorno' ? p.passaggioRitorno : (p.andataAnnullata ? p.passaggioRitorno : p.passaggioAndata);
+    const tardi = sameDay(data, now) && ora && toMin(ora) - minOf(now) < 30;
+    V.cosaScelta = cosa;
+    const msg = messaggioCancellazione(p, cosa);
+    const titolo = cosa === 'ritorno' ? 'Annulla solo il ritorno' : cosa === 'andata' ? 'Annulla solo l\'andata' : 'Non vado più';
+    const nota = cosa === 'ritorno' && andataPassata ? '<p class="notice info">L\'andata di oggi è già passata: puoi annullare solo il ritorno.</p>' : '';
+    if (tardi) {
+      return header(titolo, true) + nota +
         '<section class="card signal stop"><div class="signal-head"><span class="lamp" aria-hidden="true"></span><h2>Manca meno di mezz\'ora</h2></div>' +
         '<p>WhatsApp non basta più. Chiama subito il numero verde.</p><span class="big-number">' + NUMERO_VERDE + '</span>' +
         '<a class="btn" href="tel:' + TEL + '">📞 Chiama</a></section>' +
-        '<button class="danger" data-a="segna-annullata" data-id="' + p.id + '">Ho avvisato: segna come annullato</button>';
+        '<button class="danger" data-a="segna-annullata" data-id="' + p.id + '" data-c="' + cosa + '">Ho avvisato: segna come annullato</button>';
     }
-    return header('Non vado più', true) +
+    return header(titolo, true) + nota +
       '<section class="card"><h2>Messaggio pronto</h2><p>Si apre WhatsApp con questo messaggio. Tu tocca solo <strong>Invia</strong>.</p>' +
       '<div class="msg">' + esc(msg) + '</div>' +
       '<a class="btn primary" href="https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">💬 Apri WhatsApp</a>' +
       '<button class="quiet" data-a="copia-msg">Copia il messaggio</button>' +
       '<p class="small">Numero WhatsApp di Amicobus, solo per annullare: ' + WA_SHOW + '. Scrivi almeno 30 minuti prima del passaggio.</p></section>' +
-      '<button class="danger" data-a="segna-annullata" data-id="' + p.id + '">✅ Ho mandato il messaggio</button>';
+      '<button class="danger" data-a="segna-annullata" data-id="' + p.id + '" data-c="' + cosa + '">✅ Ho mandato il messaggio</button>';
   },
 
   accredito() {
@@ -954,8 +981,15 @@ document.addEventListener('click', e => {
     }
     case 'rifiuta': { const p = pren(el.dataset.id); p.stato = 'rifiutata'; save(); render(); break; }
     case 'annulla': go('annulla', { id: el.dataset.id }); break;
-    case 'copia-msg': copia(messaggioCancellazione(pren(V.id)), el); break;
-    case 'segna-annullata': { const p = pren(el.dataset.id); p.stato = 'annullata'; save(); go('home'); break; }
+    case 'annulla-cosa': go('annulla', { id: V.id, cosa: el.dataset.c }); break;
+    case 'copia-msg': { const p = pren(V.id); copia(messaggioCancellazione(p, V.cosaScelta || 'tutto'), el); break; }
+    case 'segna-annullata': {
+      const p = pren(el.dataset.id);
+      if (el.dataset.c === 'ritorno' && p.stato === 'confermata' && !p.andataAnnullata) { p.ritorno = false; p.ritornoAnnullato = true; }
+      else if (el.dataset.c === 'andata' && p.stato === 'confermata') { p.andataAnnullata = true; }
+      else p.stato = 'annullata';
+      save(); go('home'); break;
+    }
     case 'togli': S.prenotazioni = S.prenotazioni.filter(p => p.id !== el.dataset.id); save(); render(); break;
     case 'salva-accredito': { const v = document.getElementById('acc-data').value; S.accredito = { scadenza: v }; save(); go('home'); break; }
     case 'pin': pinBuffer = ''; go('pin'); break;
