@@ -55,6 +55,7 @@ h2 { font-size: 1.6rem; }
 h3 { font-size: 1.15rem; }
 p { margin: 0; max-width: 62ch; }
 a { color: var(--accent); }
+.step-body a, details a { overflow-wrap: anywhere; }
 a:focus-visible, button:focus-visible, summary:focus-visible { outline: 4px solid var(--bus); outline-offset: 2px; border-radius: 6px; }
 code { font-size: 0.88em; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; overflow-wrap: anywhere; }
 .small { font-size: 0.88rem; color: var(--muted); }
@@ -97,7 +98,7 @@ section.block { padding-block: 48px 8px; display: flex; flex-direction: column; 
 .num { font-family: var(--font-head); font-weight: 700; font-size: 1rem; background: var(--accent); color: var(--accent-ink); border-radius: 999px; min-width: 36px; height: 36px; display: inline-grid; place-items: center; flex: none; }
 .step-body { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .step ol, .step ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
-.shots { display: flex; flex-direction: column; gap: 14px; }
+.shots { display: flex; flex-direction: column; gap: 14px; min-width: 0; max-width: 100%; }
 .phone { margin: 0; display: flex; flex-direction: column; gap: 6px; }
 .phone img { width: 100%; max-width: 260px; border-radius: 22px; border: 6px solid #1B2730; background: #1B2730; }
 .phone figcaption { font-size: 0.85rem; color: var(--muted); }
@@ -197,7 +198,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
     <span class="kicker">Prima di iniziare</span>
     <h2>Cosa serve</h2>
     <ul class="checklist">
-      <li><span aria-hidden="true">📱</span><span>Un <strong>iPhone con iOS 17 o successivo</strong> (Safari), oppure un <strong>telefono Android con Firefox</strong>.</span></li>
+      <li><span aria-hidden="true">📱</span><span>Un <strong>iPhone con Safari</strong>, oppure un <strong>telefono Android con Firefox</strong>.</span></li>
       <li><span aria-hidden="true">🧾</span><span>I dati della persona che viaggia: nome, cognome, telefono, email, gli indirizzi dei luoghi abituali e gli orari.</span></li>
       <li><span aria-hidden="true">⏱️</span><span>Circa <strong>15 minuti</strong>, una volta sola. Di solito lo fa chi aiuta: un familiare o un operatore.</span></li>
       <li><span aria-hidden="true">🔒</span><span>Nessun account. I dati restano sul telefono e arrivano a CTM solo quando si prenota.</span></li>
@@ -225,15 +226,18 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
           <li>Tocca il pulsante <strong>≡</strong> a sinistra dell'indirizzo, nella barra in basso.</li>
           <li>Nel menu tocca <strong>Condividi</strong>.</li>
           <li>Tocca <strong>Visualizza altro</strong>.</li>
-          <li>Tocca <strong>Aggiungi alla schermata Home</strong>, poi <strong>Aggiungi</strong>.</li>
+          <li>Tocca <strong>Aggiungi alla schermata Home</strong>.</li>
+          <li>Se c'è l'interruttore <strong>Apri come app web</strong>, <strong>disattivalo</strong>. È importante: se resta attivo, l'app aperta dall'icona ha una memoria separata da quella che si apre toccando il link di un promemoria nel calendario. Le due copie non si allineano, e un viaggio preparato in una non compare nell'altra.</li>
+          <li>Tocca <strong>Aggiungi</strong>.</li>
         </ol>
-        <p class="small">Sulla Home compare l'icona gialla con il bus. Da lì l'app si apre a tutto schermo, come le altre.</p>
+        <p class="small">Sulla Home compare l'icona con il bus. Dall'icona l'app si apre in Safari: così ha sempre gli stessi dati dei promemoria nel calendario, si aggiorna da sola e lo script del passo 3 funziona.</p>
       </div>
       <div class="shots shots-row">
         <figure class="phone"><img src="img/ios-1-menu.jpg" alt="Safari: il pulsante ≡ a sinistra dell'indirizzo, evidenziato"><figcaption>1 · Il pulsante ≡</figcaption></figure>
         <figure class="phone"><img src="img/ios-2-condividi.jpg" alt="Menu di Safari con la voce Condividi evidenziata"><figcaption>2 · Condividi</figcaption></figure>
         <figure class="phone"><img src="img/ios-3-visualizza-altro.jpg" alt="Foglio di condivisione con Visualizza altro evidenziato"><figcaption>3 · Visualizza altro</figcaption></figure>
         <figure class="phone"><img src="img/ios-4-aggiungi-home.jpg" alt="Voce Aggiungi alla schermata Home evidenziata"><figcaption>4 · Aggiungi alla schermata Home</figcaption></figure>
+        <figure class="phone"><img src="img/ios-5-app-web.jpg" alt="Finestra Aggiungi a Home con l'interruttore Apri come app web spento e il pulsante Aggiungi evidenziati"><figcaption>5 · «Apri come app web» spento · 6 · Aggiungi</figcaption></figure>
       </div>
     </article>
 
@@ -455,7 +459,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
     <h2>Problemi frequenti</h2>
     <details>
       <summary>La pagina di CTM si apre ma il modulo è vuoto</summary>
-      <p>Guarda in alto: se c'è una <strong>X</strong> al posto della barra degli indirizzi, la pagina si è aperta in una finestra interna in cui le estensioni non funzionano. Su iPhone serve iOS 17 o successivo; in alternativa apri l'app da Safari invece che dall'icona sulla Home.</p>
+      <p>Guarda in alto: se c'è una <strong>X</strong> al posto della barra degli indirizzi, la pagina si è aperta in una finestra interna in cui le estensioni non funzionano. Succede con le icone aggiunte con «Apri come app web» attivo: rifai il passo 1 con l'interruttore spento (vedi «Avevo già l'icona sulla Home» qui sotto).</p>
       <p>Se la pagina è in Safari, controlla i passi 3.3 e 3.4: lo script deve essere installato e il sito di CTM autorizzato.</p>
     </details>
     <details>
@@ -472,7 +476,16 @@ footer .wrap { display: flex; flex-direction: column; gap: 8px; }
     </details>
     <details>
       <summary>Come aggiorno l'app?</summary>
-      <p>Su iPhone, a volte l'app sulla Home resta alla versione vecchia finché non si cancella l'icona e la si aggiunge di nuovo. Cancellare l'icona <strong>cancella anche i dati</strong>: prima copia il codice in ⚙️ Impostazioni → Copia di sicurezza, poi incollalo nella nuova installazione.</p>
+      <p>Non serve fare niente: l'app si apre nel browser e si aggiorna da sola. Se una novità non compare, ricarica la pagina.</p>
+    </details>
+    <details>
+      <summary>Avevo già l'icona sulla Home: i dati non coincidono con quelli del promemoria</summary>
+      <p>Le icone aggiunte con «Apri come app web» attivo hanno una memoria separata da Safari, dove invece si aprono i link dei promemoria nel calendario. Per riallinearle:</p>
+      <ol>
+        <li>apri l'app dall'icona vecchia e, in ⚙️ Impostazioni → <strong>Copia di sicurezza</strong>, copia il codice;</li>
+        <li>apri l'app in Safari, controlla quale delle due copie ha i dati più aggiornati e, se serve, in Copia di sicurezza incolla il codice e tocca <strong>Ripristina dal codice</strong>;</li>
+        <li>cancella l'icona vecchia e rifai il passo 1, con «Apri come app web» spento.</li>
+      </ol>
     </details>
   </section>
 
