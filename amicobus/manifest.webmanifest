@@ -5,7 +5,7 @@
   "description": "Prenotare Amicobus di CTM Cagliari in modo semplice.",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "browser",
   "background_color": "#EEF3F6",
   "theme_color": "#0B5AA8",
   "icons": [
